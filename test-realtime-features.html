@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Real-time Features Test - Meditech</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        .feature-section {
+            margin-bottom: 30px;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .feature-title {
+            color: #007bff;
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        .test-item {
+            margin: 10px 0;
+            padding: 10px;
+            background: #f8f9fa;
+            border-left: 4px solid #007bff;
+        }
+        .status {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 3px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        .status.pass { background: #d4edda; color: #155724; }
+        .status.fail { background: #f8d7da; color: #721c24; }
+        .status.pending { background: #fff3cd; color: #856404; }
+        .code-block {
+            background: #f4f4f4;
+            padding: 10px;
+            border-radius: 4px;
+            font-family: monospace;
+            margin: 10px 0;
+            overflow-x: auto;
+        }
+        .endpoint {
+            background: #e3f2fd;
+            padding: 5px 10px;
+            border-radius: 3px;
+            font-family: monospace;
+            margin: 5px 0;
+        }
+        .websocket {
+            background: #f3e5f5;
+            padding: 5px 10px;
+            border-radius: 3px;
+            font-family: monospace;
+            margin: 5px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚀 Meditech Real-time Features Test Suite</h1>
+        <p>Comprehensive testing guide for the enhanced real-time chat and video calling features.</p>
+    </div>
+
+    <div class="container">
+        <div class="feature-section">
+            <div class="feature-title">🔌 WebSocket Connection & Presence</div>
+            
+            <div class="test-item">
+                <strong>User Presence Tracking</strong>
+                <span class="status pending">PENDING</span>
+                <p>Test user online/offline status updates in real-time</p>
+                <div class="websocket">WebSocket: /topic/presence</div>
+                <div class="endpoint">POST /api/presence/update</div>
+            </div>
+
+            <div class="test-item">
+                <strong>Heartbeat Mechanism</strong>
+                <span class="status pending">PENDING</span>
+                <p>Verify automatic heartbeat every 30 seconds</p>
+                <div class="websocket">WebSocket: /app/presence/heartbeat</div>
+            </div>
+
+            <div class="test-item">
+                <strong>Connection Recovery</strong>
+                <span class="status pending">PENDING</span>
+                <p>Test automatic reconnection after network interruption</p>
+            </div>
+        </div>
+
+        <div class="feature-section">
+            <div class="feature-title">💬 Enhanced Chat Features</div>
+            
+            <div class="test-item">
+                <strong>Real-time Messaging</strong>
+                <span class="status pending">PENDING</span>
+                <p>Send and receive messages instantly</p>
+                <div class="websocket">WebSocket: /topic/chat/{chatId}</div>
+                <div class="endpoint">POST /app/chat/{chatId}/send</div>
+            </div>
+
+            <div class="test-item">
+                <strong>Typing Indicators</strong>
+                <span class="status pending">PENDING</span>
+                <p>Show when users are typing with auto-timeout</p>
+                <div class="websocket">WebSocket: /topic/chat/{chatId}/typing</div>
+                <div class="endpoint">POST /app/chat/{chatId}/typing</div>
+            </div>
+
+            <div class="test-item">
+                <strong>Message Status Updates</strong>
+                <span class="status pending">PENDING</span>
+                <p>Track sent, delivered, and read status</p>
+                <div class="websocket">WebSocket: /topic/chat/{chatId}/status</div>
+                <div class="endpoint">POST /app/message/{messageId}/read</div>
+            </div>
+
+            <div class="test-item">
+                <strong>Message Reactions</strong>
+                <span class="status pending">PENDING</span>
+                <p>Add and remove emoji reactions to messages</p>
+                <div class="websocket">WebSocket: /topic/chat/{chatId}/reactions</div>
+                <div class="endpoint">POST /app/message/{messageId}/react</div>
+            </div>
+
+            <div class="test-item">
+                <strong>File Attachments</strong>
+                <span class="status pending">PENDING</span>
+                <p>Send images, documents, and other files</p>
+                <div class="endpoint">POST /api/chats/{chatId}/messages/attachment</div>
+            </div>
+
+            <div class="test-item">
+                <strong>Message Replies</strong>
+                <span class="status pending">PENDING</span>
+                <p>Reply to specific messages with context</p>
+                <div class="endpoint">POST /app/chat/{chatId}/reply</div>
+            </div>
+        </div>
+
+        <div class="feature-section">
+            <div class="feature-title">📹 Video Calling Features</div>
+            
+            <div class="test-item">
+                <strong>WebRTC Signaling</strong>
+                <span class="status pending">PENDING</span>
+                <p>Establish peer-to-peer connections</p>
+                <div class="websocket">WebSocket: /topic/webrtc/{roomId}/{userId}</div>
+                <div class="endpoint">POST /app/webrtc/{roomId}/signal</div>
+            </div>
+
+            <div class="test-item">
+                <strong>Room Management</strong>
+                <span class="status pending">PENDING</span>
+                <p>Join and leave video consultation rooms</p>
+                <div class="endpoint">POST /app/webrtc/{roomId}/join</div>
+                <div class="endpoint">POST /app/webrtc/{roomId}/leave</div>
+            </div>
+
+            <div class="test-item">
+                <strong>Media Controls</strong>
+                <span class="status pending">PENDING</span>
+                <p>Mute/unmute audio and video</p>
+                <div class="endpoint">POST /app/webrtc/{roomId}/mute</div>
+            </div>
+
+            <div class="test-item">
+                <strong>Screen Sharing</strong>
+                <span class="status pending">PENDING</span>
+                <p>Share screen during video calls</p>
+                <div class="websocket">WebSocket: SCREEN_SHARE_START/STOP signals</div>
+            </div>
+
+            <div class="test-item">
+                <strong>Call Quality Indicators</strong>
+                <span class="status pending">PENDING</span>
+                <p>Monitor connection quality and bandwidth</p>
+            </div>
+        </div>
+
+        <div class="feature-section">
+            <div class="feature-title">🔧 Backend Enhancements</div>
+            
+            <div class="test-item">
+                <strong>User Presence Service</strong>
+                <span class="status pending">PENDING</span>
+                <p>Scheduled cleanup of inactive users and stale typing indicators</p>
+                <div class="code-block">@Scheduled(fixedRate = 300000) // 5 minutes</div>
+            </div>
+
+            <div class="test-item">
+                <strong>Message Persistence</strong>
+                <span class="status pending">PENDING</span>
+                <p>Enhanced Message entity with reactions, replies, and attachments</p>
+            </div>
+
+            <div class="test-item">
+                <strong>WebSocket Authentication</strong>
+                <span class="status pending">PENDING</span>
+                <p>JWT-based authentication for WebSocket connections</p>
+            </div>
+
+            <div class="test-item">
+                <strong>Error Handling</strong>
+                <span class="status pending">PENDING</span>
+                <p>Comprehensive error handling and logging</p>
+            </div>
+        </div>
+
+        <div class="feature-section">
+            <div class="feature-title">🎨 Frontend Enhancements</div>
+            
+            <div class="test-item">
+                <strong>Enhanced Chat UI</strong>
+                <span class="status pending">PENDING</span>
+                <p>Modern chat interface with message bubbles and status indicators</p>
+            </div>
+
+            <div class="test-item">
+                <strong>Drag & Drop File Upload</strong>
+                <span class="status pending">PENDING</span>
+                <p>Drag files directly into chat for upload</p>
+            </div>
+
+            <div class="test-item">
+                <strong>Responsive Design</strong>
+                <span class="status pending">PENDING</span>
+                <p>Mobile-friendly chat and video interfaces</p>
+            </div>
+
+            <div class="test-item">
+                <strong>Real-time Notifications</strong>
+                <span class="status pending">PENDING</span>
+                <p>Toast notifications for new messages and call invitations</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <h2>🧪 Testing Instructions</h2>
+        
+        <h3>1. Start the Application</h3>
+        <div class="code-block">
+# Backend
+cd backend
+./mvnw spring-boot:run
+
+# Frontend
+cd frontend
+npm start
+        </div>
+
+        <h3>2. Test Chat Features</h3>
+        <ol>
+            <li>Login as two different users (doctor and patient)</li>
+            <li>Create a chat between them</li>
+            <li>Test real-time messaging</li>
+            <li>Test typing indicators</li>
+            <li>Test file attachments</li>
+            <li>Test message reactions</li>
+            <li>Test message replies</li>
+        </ol>
+
+        <h3>3. Test Video Calling</h3>
+        <ol>
+            <li>Schedule a video consultation</li>
+            <li>Join the consultation room</li>
+            <li>Test video/audio controls</li>
+            <li>Test screen sharing</li>
+            <li>Test call termination</li>
+        </ol>
+
+        <h3>4. Test Presence Features</h3>
+        <ol>
+            <li>Monitor online/offline status</li>
+            <li>Test presence updates during video calls</li>
+            <li>Test automatic cleanup of inactive users</li>
+        </ol>
+
+        <h3>5. Performance Testing</h3>
+        <ol>
+            <li>Test with multiple concurrent users</li>
+            <li>Test message pagination</li>
+            <li>Test WebSocket reconnection</li>
+            <li>Monitor memory usage and performance</li>
+        </ol>
+    </div>
+
+    <div class="container">
+        <h2>📊 Expected Results</h2>
+        <ul>
+            <li>✅ Messages appear instantly without page refresh</li>
+            <li>✅ Typing indicators show and hide automatically</li>
+            <li>✅ User presence updates in real-time</li>
+            <li>✅ Video calls establish successfully</li>
+            <li>✅ File uploads work seamlessly</li>
+            <li>✅ Message reactions update immediately</li>
+            <li>✅ WebSocket connections recover from interruptions</li>
+            <li>✅ Mobile interface is responsive and functional</li>
+        </ul>
+    </div>
+
+    <script>
+        // Simple test status updater
+        function updateTestStatus(testName, status) {
+            const statusElements = document.querySelectorAll('.status');
+            statusElements.forEach(el => {
+                if (el.previousElementSibling.textContent.includes(testName)) {
+                    el.className = `status ${status}`;
+                    el.textContent = status.toUpperCase();
+                }
+            });
+        }
+
+        // Example usage:
+        // updateTestStatus('Real-time Messaging', 'pass');
+        // updateTestStatus('Typing Indicators', 'fail');
+
+        console.log('Real-time Features Test Suite Loaded');
+        console.log('Use updateTestStatus(testName, status) to update test results');
+    </script>
+</body>
+</html>

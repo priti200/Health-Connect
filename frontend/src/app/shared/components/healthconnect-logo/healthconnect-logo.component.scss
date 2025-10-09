@@ -1,0 +1,129 @@
+// HealthConnect Official Logo Component
+.healthconnect-logo {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  transition: all 0.3s ease;
+
+  .logo-icon {
+    background: linear-gradient(135deg, #0d9488, #0f766e);
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 8px 24px rgba(20, 184, 166, 0.3);
+    transition: all 0.3s ease;
+
+    i {
+      color: white;
+      font-weight: 600;
+    }
+  }
+
+  .logo-text {
+    font-weight: 700;
+    color: #1f2937;
+    font-family: 'Inter', sans-serif;
+    letter-spacing: -0.025em;
+  }
+
+  &:hover .logo-icon {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 32px rgba(20, 184, 166, 0.4);
+  }
+}
+
+// Size variants
+.logo-xs {
+  .logo-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 12px;
+    
+    i {
+      font-size: 0.875rem;
+    }
+  }
+  
+  .logo-text {
+    font-size: 0.875rem;
+  }
+}
+
+.logo-sm {
+  .logo-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 16px;
+    
+    i {
+      font-size: 1rem;
+    }
+  }
+  
+  .logo-text {
+    font-size: 1rem;
+  }
+}
+
+.logo-md {
+  .logo-icon {
+    width: 60px;
+    height: 60px;
+    border-radius: 20px;
+    
+    i {
+      font-size: 1.5rem;
+    }
+  }
+  
+  .logo-text {
+    font-size: 1.5rem;
+  }
+}
+
+.logo-lg {
+  .logo-icon {
+    width: 80px;
+    height: 80px;
+    border-radius: 24px;
+    
+    i {
+      font-size: 2rem;
+    }
+  }
+  
+  .logo-text {
+    font-size: 2rem;
+  }
+}
+
+.logo-xl {
+  .logo-icon {
+    width: 120px;
+    height: 120px;
+    border-radius: 32px;
+    
+    i {
+      font-size: 3rem;
+    }
+  }
+  
+  .logo-text {
+    font-size: 3rem;
+  }
+}
+
+// Dark theme variant
+.logo-dark {
+  .logo-text {
+    color: white;
+  }
+}
+
+// Icon only variant
+.logo-icon-only {
+  .logo-text {
+    display: none;
+  }
+}

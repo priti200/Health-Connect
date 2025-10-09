@@ -1,0 +1,219 @@
+.doctor-dashboard {
+  padding: 1rem;
+  max-width: 1200px;
+  margin: 0 auto;
+
+  .dashboard-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 2rem;
+    border-radius: 12px;
+    margin-bottom: 2rem;
+
+    h2 {
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+    }
+
+    .header-actions {
+      .btn {
+        background: rgba(255, 255, 255, 0.2);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        color: white;
+
+        &:hover {
+          background: rgba(255, 255, 255, 0.3);
+          border-color: rgba(255, 255, 255, 0.5);
+        }
+      }
+    }
+  }
+
+  .nav-tabs {
+    border-bottom: 2px solid #e9ecef;
+
+    .nav-link {
+      border: none;
+      background: none;
+      color: #6c757d;
+      font-weight: 500;
+      padding: 1rem 1.5rem;
+      border-radius: 8px 8px 0 0;
+      transition: all 0.3s ease;
+
+      &:hover {
+        background: #f8f9fa;
+        color: #495057;
+      }
+
+      &.active {
+        background: #007bff;
+        color: white;
+        border-bottom: 2px solid #007bff;
+
+        .badge {
+          background: rgba(255, 255, 255, 0.2) !important;
+        }
+      }
+
+      .badge {
+        font-size: 0.75rem;
+      }
+    }
+  }
+
+  .consultation-card {
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+
+    &:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    .card {
+      border: 1px solid #e9ecef;
+      border-radius: 12px;
+      overflow: hidden;
+
+      &.border-success {
+        border-color: #28a745;
+        box-shadow: 0 2px 8px rgba(40, 167, 69, 0.2);
+      }
+    }
+
+    .patient-avatar {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      background: #e9ecef;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.2rem;
+      color: #6c757d;
+
+      &.bg-success {
+        background: #28a745;
+      }
+    }
+
+    .consultation-time {
+      text-align: center;
+
+      .fw-bold {
+        font-size: 1.1rem;
+        color: #495057;
+      }
+    }
+
+    .consultation-status {
+      text-align: center;
+
+      .badge {
+        font-size: 0.85rem;
+        padding: 0.5rem 1rem;
+      }
+    }
+
+    .consultation-info {
+      text-align: center;
+
+      .fw-bold {
+        font-size: 0.9rem;
+        color: #495057;
+        margin-bottom: 0.5rem;
+      }
+    }
+
+    .consultation-actions {
+      .btn {
+        border-radius: 8px;
+        font-weight: 500;
+        transition: all 0.2s ease;
+
+        &.pulse {
+          animation: pulse 2s infinite;
+        }
+
+        &:hover {
+          transform: translateY(-1px);
+        }
+      }
+    }
+  }
+
+  .empty-state {
+    background: #f8f9fa;
+    border-radius: 12px;
+    padding: 3rem;
+
+    i {
+      opacity: 0.5;
+    }
+
+    h5 {
+      margin-bottom: 1rem;
+    }
+  }
+
+  @keyframes pulse {
+    0% {
+      box-shadow: 0 0 0 0 rgba(40, 167, 69, 0.7);
+    }
+    70% {
+      box-shadow: 0 0 0 10px rgba(40, 167, 69, 0);
+    }
+    100% {
+      box-shadow: 0 0 0 0 rgba(40, 167, 69, 0);
+    }
+  }
+
+  // Responsive design
+  @media (max-width: 768px) {
+    padding: 0.5rem;
+
+    .dashboard-header {
+      padding: 1.5rem;
+      text-align: center;
+
+      .d-flex {
+        flex-direction: column;
+        gap: 1rem;
+      }
+    }
+
+    .consultation-card {
+      .row {
+        text-align: center;
+
+        .col-md-3,
+        .col-md-6 {
+          margin-bottom: 1rem;
+        }
+      }
+
+      .consultation-actions {
+        .btn {
+          margin: 0.25rem;
+        }
+      }
+    }
+
+    .nav-tabs {
+      .nav-link {
+        padding: 0.75rem 1rem;
+        font-size: 0.9rem;
+      }
+    }
+  }
+}
+
+// Global badge styles for consultation status
+.badge {
+  &.bg-primary { background-color: #007bff !important; }
+  &.bg-success { background-color: #28a745 !important; }
+  &.bg-warning { background-color: #ffc107 !important; color: #212529 !important; }
+  &.bg-danger { background-color: #dc3545 !important; }
+  &.bg-info { background-color: #17a2b8 !important; }
+  &.bg-secondary { background-color: #6c757d !important; }
+}

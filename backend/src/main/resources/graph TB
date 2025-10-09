@@ -1,0 +1,118 @@
+graph TB
+    %% Styling
+    classDef viewLayer fill:#e1d5e7,stroke:#9673a6,stroke-width:2px
+    classDef controllerLayer fill:#dae8fc,stroke:#6c8ebf,stroke-width:2px
+    classDef serviceLayer fill:#fff2cc,stroke:#d6b656,stroke-width:2px
+    classDef modelLayer fill:#d5e8d4,stroke:#82b366,stroke-width:2px
+    classDef dataLayer fill:#f8cecc,stroke:#b85450,stroke-width:2px
+    classDef realtimeLayer fill:#e6f3ff,stroke:#4a90e2,stroke-width:2px
+
+    %% View Layer - Angular Frontend
+    subgraph VL ["VIEW LAYER - Angular Frontend"]
+        PD["Patient Dashboard<br/>Appointments<br/>Health Records<br/>Quick Booking"]
+        DD["Doctor Dashboard<br/>Daily Schedule<br/>Patient Queue<br/>Medical Records"]
+        AB["Appointment Booking<br/>Doctor Calendar<br/>Time Slots<br/>Confirmation"]
+        VI["Video Interface<br/>WebRTC Calling<br/>Screen Share<br/>Recording"]
+        CS["Chat System<br/>Real-time Messaging<br/>Live Communication<br/>History"]
+        AP["Auth Portal<br/>Login/Register<br/>Role Access<br/>Recovery"]
+        MR["Medical Records<br/>Patient Information<br/>Prescriptions<br/>Consultation Notes"]
+    end
+
+    %% Real-time Communication Layer
+    subgraph RTL ["REAL-TIME LAYER"]
+        WS["WebSocket<br/>STOMP Protocol<br/>Chat Messages<br/>Notifications<br/>Live Updates"]
+        WR["WebRTC<br/>P2P Connection<br/>Video Calls<br/>Screen Share<br/>Audio Communication"]
+    end
+
+    %% Controller Layer - Spring Boot
+    subgraph CL ["CONTROLLER LAYER - Spring Boot REST API"]
+        AC["AuthController<br/>/api/auth<br/>POST /login<br/>POST /register<br/>GET /profile"]
+        APC["AppointmentController<br/>/api/appointments<br/>GET /<br/>POST /<br/>PUT /{id}"]
+        UC["UserController<br/>/api/users<br/>GET /doctors<br/>GET /{id}<br/>PUT /{id}"]
+        MC["MessageController<br/>/api/messages<br/>GET /conversations<br/>POST /send<br/>WebSocket Integration"]
+        CC["ConsultationController<br/>/api/consultations<br/>POST /start<br/>POST /join/{id}<br/>POST /end/{id}"]
+        WC["WebRTCController<br/>/api/webrtc<br/>POST /offer<br/>POST /answer<br/>POST /ice-candidate"]
+    end
+
+    %% Service Layer
+    subgraph SL ["SERVICE LAYER - Business Logic"]
+        AS["AuthService<br/>authenticate()<br/>registerUser()<br/>generateJWT()<br/>validateToken()"]
+        APS["AppointmentService<br/>bookAppointment()<br/>getAvailableSlots()<br/>cancelAppointment()<br/>sendReminders()"]
+        US["UserService<br/>createUser()<br/>getUserById()<br/>updateUser()<br/>getDoctorsBySpecialty()"]
+        CMS["CommunicationService<br/>sendMessage()<br/>getConversationHistory()<br/>createVideoSession()<br/>Real-time Messaging"]
+        WRS["WebRTCService<br/>Video Call Management<br/>Session Handling<br/>Signaling Support"]
+        PS["PresenceService<br/>User Online Status<br/>Activity Tracking<br/>Connection Management"]
+    end
+
+    %% Model Layer
+    subgraph ML ["MODEL ENTITIES - Data Models"]
+        UE["User Entity<br/>id, email, password<br/>firstName, lastName<br/>role PATIENT/DOCTOR<br/>specialization<br/>medicalHistory"]
+        APE["Appointment Entity<br/>id, patientId, doctorId<br/>scheduledTime, duration<br/>status, reason<br/>consultationType"]
+        ME["Message Entity<br/>id, senderId, receiverId<br/>content, messageType<br/>timestamp, isRead<br/>conversationId"]
+        CE["Consultation Entity<br/>id, appointmentId<br/>sessionId, startTime<br/>endTime, status<br/>notes"]
+        PRE["Presence Entity<br/>userId, status<br/>lastSeen, isOnline<br/>currentActivity"]
+    end
+
+    %% Data Layer
+    subgraph DL ["DATA LAYER"]
+        DB[("PostgreSQL Database<br/>Primary Storage<br/>Users, Appointments<br/>Messages, Consultations<br/>ACID Compliance")]
+        CACHE[("Redis Cache<br/>Session Management<br/>JWT Tokens<br/>Real-time Data<br/>User Presence")]
+    end
+
+    %% HTTP Request Flow
+    PD -.->|HTTP Requests| AC
+    DD -.->|HTTP Requests| APC
+    AB -.->|HTTP Requests| APC
+    VI -.->|HTTP Requests| CC
+    CS -.->|HTTP Requests| MC
+    AP -.->|HTTP Requests| AC
+    MR -.->|HTTP Requests| UC
+
+    %% Real-time Connections
+    CS <-.->|WebSocket| WS
+    VI <-.->|WebRTC| WR
+    PD <-.->|Live Updates| WS
+    DD <-.->|Notifications| WS
+
+    %% Controller to Service Flow
+    AC --> AS
+    APC --> APS
+    UC --> US
+    MC --> CMS
+    CC --> CMS
+    WC --> WRS
+
+    %% Service to Model Flow
+    AS --> UE
+    APS --> APE
+    US --> UE
+    CMS --> ME
+    CMS --> CE
+    WRS --> CE
+    PS --> PRE
+
+    %% Model to Data Flow
+    UE --> DB
+    APE --> DB
+    ME --> DB
+    CE --> DB
+    PRE --> DB
+    
+    %% Cache Integration
+    AS --> CACHE
+    CMS --> CACHE
+    PS --> CACHE
+    WRS --> CACHE
+
+    %% WebSocket/WebRTC to Services
+    WS --> CMS
+    WS --> PS
+    WR --> WRS
+
+    %% Apply styles
+    class PD,DD,AB,VI,CS,AP,MR viewLayer
+    class AC,APC,UC,MC,CC,WC controllerLayer
+    class AS,APS,US,CMS,WRS,PS serviceLayer
+    class UE,APE,ME,CE,PRE modelLayer
+    class DB,CACHE dataLayer
+    class WS,WR realtimeLayer

@@ -1,0 +1,76 @@
+.btn {
+  transition: all 0.2s ease-in-out;
+  
+  &:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  }
+  
+  &:disabled {
+    transform: none;
+    box-shadow: none;
+  }
+}
+
+.text-warning {
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0% { opacity: 1; }
+  50% { opacity: 0.7; }
+  100% { opacity: 1; }
+}
+
+// Custom Teal Button Styles for Chat Access
+.btn-teal {
+  background: linear-gradient(135deg, #0d9488, #0f766e);
+  border: none;
+  border-radius: 12px;
+  font-weight: 600;
+  color: white;
+  box-shadow: 0 6px 20px rgba(20, 184, 166, 0.25);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 28px rgba(20, 184, 166, 0.35);
+    background: linear-gradient(135deg, #0f766e, #0d9488);
+    color: white;
+  }
+
+  &:active {
+    transform: translateY(0);
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    transform: none;
+    box-shadow: 0 4px 12px rgba(20, 184, 166, 0.15);
+  }
+}
+
+.btn-teal-outline {
+  border: 2px solid #0d9488;
+  color: #0d9488;
+  border-radius: 12px;
+  font-weight: 600;
+  background: transparent;
+  transition: all 0.3s ease;
+
+  &:hover {
+    background: #0d9488;
+    border-color: #0d9488;
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(20, 184, 166, 0.25);
+  }
+
+  &:active {
+    transform: translateY(0);
+  }
+
+  &:focus {
+    box-shadow: 0 0 0 0.2rem rgba(13, 148, 136, 0.25);
+  }
+}

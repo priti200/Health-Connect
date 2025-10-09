@@ -1,0 +1,86 @@
+.consultation-card {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  }
+}
+
+.status-badge {
+  font-size: 0.75rem;
+  padding: 0.25rem 0.5rem;
+}
+
+.consultation-time {
+  font-size: 0.9rem;
+  color: #6c757d;
+}
+
+.participant-info {
+  .participant-name {
+    font-weight: 600;
+    color: #495057;
+  }
+  
+  .participant-role {
+    font-size: 0.85rem;
+    color: #6c757d;
+  }
+}
+
+.action-buttons {
+  .btn {
+    font-size: 0.875rem;
+  }
+}
+
+.empty-state {
+  padding: 3rem 1rem;
+  
+  i {
+    opacity: 0.5;
+  }
+}
+
+.loading-state {
+  padding: 3rem 1rem;
+}
+
+.consultation-type {
+  font-size: 0.8rem;
+  background-color: #f8f9fa;
+  color: #495057;
+  padding: 0.2rem 0.5rem;
+  border-radius: 0.25rem;
+  display: inline-block;
+}
+
+.time-indicator {
+  &.soon {
+    color: #ffc107;
+    font-weight: 600;
+  }
+  
+  &.now {
+    color: #dc3545;
+    font-weight: 600;
+    animation: pulse 1s infinite;
+  }
+}
+
+@keyframes pulse {
+  0% { opacity: 1; }
+  50% { opacity: 0.5; }
+  100% { opacity: 1; }
+}
+
+.card-header {
+  background-color: #f8f9fa;
+  border-bottom: 1px solid #dee2e6;
+}
+
+.card-footer {
+  background-color: transparent;
+  border-top: 1px solid #dee2e6;
+}

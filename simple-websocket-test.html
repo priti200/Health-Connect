@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple WebSocket Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .container {
+            background: #f5f5f5;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 10px 0;
+        }
+        .success { background-color: #d4edda; }
+        .error { background-color: #f8d7da; }
+        .warning { background-color: #fff3cd; }
+        button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover { background-color: #0056b3; }
+        .log {
+            height: 300px;
+            overflow-y: auto;
+            background-color: #000;
+            color: #00ff00;
+            padding: 10px;
+            font-family: monospace;
+            font-size: 12px;
+        }
+        .status {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+        .connected { background-color: #28a745; }
+        .disconnected { background-color: #dc3545; }
+        .connecting { background-color: #ffc107; }
+    </style>
+</head>
+<body>
+    <h1>🔌 Simple WebSocket Connection Test</h1>
+    
+    <div class="container">
+        <h2>WebSocket Status</h2>
+        <p>Status: <span class="status disconnected" id="status-indicator"></span><span id="status-text">Disconnected</span></p>
+        <button onclick="testConnection()">Test Connection</button>
+        <button onclick="disconnect()">Disconnect</button>
+    </div>
+
+    <div class="container">
+        <h2>Test Results</h2>
+        <div id="results"></div>
+    </div>
+
+    <div class="container">
+        <h2>Debug Log</h2>
+        <div class="log" id="log"></div>
+        <button onclick="clearLog()">Clear Log</button>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1.6.1/dist/sockjs.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@stomp/stompjs@7.1.1/bundles/stomp.umd.min.js"></script>
+    
+    <script>
+        let stompClient = null;
+
+        function log(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            const logElement = document.getElementById('log');
+            const color = type === 'error' ? '#ff6b6b' : type === 'success' ? '#51cf66' : '#00ff00';
+            logElement.innerHTML += `<div style="color: ${color}">[${timestamp}] ${message}</div>`;
+            logElement.scrollTop = logElement.scrollHeight;
+            console.log(`[${timestamp}] ${message}`);
+        }
+
+        function updateStatus(status, text) {
+            const indicator = document.getElementById('status-indicator');
+            const textElement = document.getElementById('status-text');
+            
+            indicator.className = `status ${status}`;
+            textElement.textContent = text;
+        }
+
+        function updateResults(message, type) {
+            const results = document.getElementById('results');
+            results.className = `container ${type}`;
+            results.innerHTML = `<strong>${type.toUpperCase()}:</strong> ${message}`;
+        }
+
+        function testConnection() {
+            log('🚀 Starting WebSocket connection test...');
+            updateStatus('connecting', 'Connecting...');
+            updateResults('Testing connection...', 'warning');
+
+            try {
+                // Test 1: Basic SockJS connection
+                log('📡 Testing SockJS connection to http://localhost:8080/api/ws');
+
+                const socket = new SockJS('http://localhost:8080/api/ws');
+                
+                socket.onopen = function() {
+                    log('✅ SockJS connection opened successfully!', 'success');
+                    updateStatus('connected', 'SockJS Connected');
+                    
+                    // Test 2: STOMP over SockJS
+                    testStompConnection();
+                };
+                
+                socket.onclose = function(event) {
+                    log(`❌ SockJS connection closed: ${event.code} - ${event.reason}`, 'error');
+                    updateStatus('disconnected', 'Disconnected');
+                    updateResults('SockJS connection failed', 'error');
+                };
+                
+                socket.onerror = function(error) {
+                    log(`❌ SockJS error: ${error}`, 'error');
+                    updateStatus('disconnected', 'Error');
+                    updateResults('SockJS connection error', 'error');
+                };
+
+            } catch (error) {
+                log(`❌ Failed to create SockJS connection: ${error.message}`, 'error');
+                updateStatus('disconnected', 'Failed');
+                updateResults(`Connection failed: ${error.message}`, 'error');
+            }
+        }
+
+        function testStompConnection() {
+            try {
+                log('📡 Testing STOMP connection...');
+                
+                stompClient = new StompJs.Client({
+                    webSocketFactory: () => new SockJS('http://localhost:8080/api/ws'),
+                    debug: (str) => {
+                        log(`STOMP Debug: ${str}`);
+                    },
+                    onConnect: (frame) => {
+                        log('✅ STOMP connection successful!', 'success');
+                        updateStatus('connected', 'STOMP Connected');
+                        updateResults('WebSocket connection successful! 🎉', 'success');
+                        
+                        // Test subscription
+                        testSubscription();
+                    },
+                    onWebSocketClose: (event) => {
+                        log(`❌ STOMP WebSocket closed: ${event.code}`, 'error');
+                        updateStatus('disconnected', 'Disconnected');
+                    },
+                    onStompError: (frame) => {
+                        log(`❌ STOMP error: ${frame.headers.message}`, 'error');
+                        updateStatus('disconnected', 'STOMP Error');
+                        updateResults(`STOMP error: ${frame.headers.message}`, 'error');
+                    },
+                    onWebSocketError: (error) => {
+                        log(`❌ WebSocket error: ${error}`, 'error');
+                        updateStatus('disconnected', 'WebSocket Error');
+                        updateResults('WebSocket error occurred', 'error');
+                    }
+                });
+
+                stompClient.activate();
+
+            } catch (error) {
+                log(`❌ Failed to create STOMP client: ${error.message}`, 'error');
+                updateResults(`STOMP connection failed: ${error.message}`, 'error');
+            }
+        }
+
+        function testSubscription() {
+            try {
+                log('📡 Testing topic subscription...');
+                
+                // Test subscribing to a topic
+                const subscription = stompClient.subscribe('/topic/test', (message) => {
+                    log(`📨 Received test message: ${message.body}`, 'success');
+                });
+                
+                log('✅ Successfully subscribed to /topic/test', 'success');
+                
+                // Test sending a message
+                setTimeout(() => {
+                    try {
+                        log('📤 Sending test message...');
+                        stompClient.publish({
+                            destination: '/app/test',
+                            body: JSON.stringify({ message: 'Hello WebSocket!' })
+                        });
+                        log('✅ Test message sent successfully', 'success');
+                    } catch (error) {
+                        log(`❌ Failed to send test message: ${error.message}`, 'error');
+                    }
+                }, 1000);
+                
+            } catch (error) {
+                log(`❌ Failed to test subscription: ${error.message}`, 'error');
+            }
+        }
+
+        function disconnect() {
+            if (stompClient) {
+                stompClient.deactivate();
+                log('🔌 Disconnected from WebSocket', 'info');
+                updateStatus('disconnected', 'Disconnected');
+                updateResults('Disconnected', 'warning');
+            }
+        }
+
+        function clearLog() {
+            document.getElementById('log').innerHTML = '';
+        }
+
+        // Auto-test on page load
+        window.onload = function() {
+            log('🔧 Simple WebSocket Test loaded');
+            log('📋 This test will verify basic WebSocket connectivity');
+            log('🎯 Click "Test Connection" to start the test');
+        };
+    </script>
+</body>
+</html>

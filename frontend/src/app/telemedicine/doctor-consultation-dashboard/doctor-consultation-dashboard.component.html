@@ -1,0 +1,253 @@
+<div class="doctor-dashboard">
+  <!-- Header -->
+  <div class="dashboard-header mb-4">
+    <div class="d-flex justify-content-between align-items-center">
+      <div>
+        <h2 class="mb-1">
+          <i class="fas fa-user-md me-2 text-primary"></i>
+          Doctor Consultation Dashboard
+        </h2>
+        <p class="text-muted mb-0">Manage your video consultations</p>
+      </div>
+      
+      <div class="header-actions">
+        <button class="btn btn-outline-primary" (click)="onRefresh()" [disabled]="isLoading">
+          <i class="fas fa-sync-alt me-2" [class.fa-spin]="isLoading"></i>
+          Refresh
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Error State -->
+  <div *ngIf="error" class="alert alert-danger" role="alert">
+    <i class="fas fa-exclamation-triangle me-2"></i>
+    {{ error }}
+    <button class="btn btn-sm btn-outline-danger ms-2" (click)="onRefresh()">
+      Try Again
+    </button>
+  </div>
+
+  <!-- Tabs -->
+  <ul class="nav nav-tabs mb-4">
+    <li class="nav-item">
+      <button 
+        class="nav-link" 
+        [class.active]="selectedTab === 'upcoming'"
+        (click)="selectTab('upcoming')">
+        <i class="fas fa-clock me-2"></i>
+        Upcoming
+        <span class="badge bg-primary ms-2" *ngIf="getTabCount('upcoming') > 0">
+          {{ getTabCount('upcoming') }}
+        </span>
+      </button>
+    </li>
+    <li class="nav-item">
+      <button 
+        class="nav-link" 
+        [class.active]="selectedTab === 'active'"
+        (click)="selectTab('active')">
+        <i class="fas fa-video me-2"></i>
+        Active
+        <span class="badge bg-success ms-2" *ngIf="getTabCount('active') > 0">
+          {{ getTabCount('active') }}
+        </span>
+      </button>
+    </li>
+    <li class="nav-item">
+      <button 
+        class="nav-link" 
+        [class.active]="selectedTab === 'completed'"
+        (click)="selectTab('completed')">
+        <i class="fas fa-check-circle me-2"></i>
+        Completed
+        <span class="badge bg-info ms-2" *ngIf="getTabCount('completed') > 0">
+          {{ getTabCount('completed') }}
+        </span>
+      </button>
+    </li>
+  </ul>
+
+  <!-- Loading State -->
+  <div *ngIf="isLoading && !error" class="text-center py-5">
+    <div class="spinner-border text-primary" role="status">
+      <span class="visually-hidden">Loading...</span>
+    </div>
+    <p class="text-muted mt-3">Loading consultations...</p>
+  </div>
+
+  <!-- Upcoming Consultations -->
+  <div *ngIf="selectedTab === 'upcoming' && !isLoading" class="consultation-list">
+    <div *ngIf="upcomingConsultations.length === 0" class="empty-state">
+      <div class="text-center py-5">
+        <i class="fas fa-calendar-alt text-muted mb-3" style="font-size: 3rem;"></i>
+        <h5 class="text-muted">No Upcoming Consultations</h5>
+        <p class="text-muted">You don't have any scheduled consultations.</p>
+      </div>
+    </div>
+
+    <div *ngFor="let consultation of upcomingConsultations" class="consultation-card mb-3">
+      <div class="card">
+        <div class="card-body">
+          <div class="row align-items-center">
+            <div class="col-md-6">
+              <div class="d-flex align-items-center mb-2">
+                <div class="patient-avatar me-3">
+                  <i class="fas fa-user-injured"></i>
+                </div>
+                <div>
+                  <h6 class="mb-0">{{ consultation.patient.firstName }} {{ consultation.patient.lastName }}</h6>
+                  <small class="text-muted">{{ getTypeLabel(consultation.type) }}</small>
+                </div>
+              </div>
+            </div>
+            
+            <div class="col-md-3">
+              <div class="consultation-time">
+                <div class="fw-bold">{{ formatTime(consultation.scheduledStartTime) }}</div>
+                <small class="text-muted">{{ formatDateTime(consultation.scheduledStartTime) }}</small>
+                <div class="mt-1">
+                  <span class="badge" [class]="'bg-' + getStatusColor(consultation.status)">
+                    {{ getTimeUntilConsultation(consultation) }}
+                  </span>
+                </div>
+              </div>
+            </div>
+            
+            <div class="col-md-3 text-end">
+              <div class="consultation-actions">
+                <button 
+                  *ngIf="canStart(consultation)"
+                  class="btn btn-success btn-sm me-2"
+                  (click)="onStartConsultation(consultation)"
+                  [class.pulse]="isConsultationSoon(consultation)">
+                  <i class="fas fa-play me-1"></i>
+                  Start
+                </button>
+                
+                <button 
+                  class="btn btn-outline-primary btn-sm"
+                  (click)="onViewConsultation(consultation)">
+                  <i class="fas fa-eye me-1"></i>
+                  View
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Active Consultations -->
+  <div *ngIf="selectedTab === 'active' && !isLoading" class="consultation-list">
+    <div *ngIf="activeConsultations.length === 0" class="empty-state">
+      <div class="text-center py-5">
+        <i class="fas fa-video text-muted mb-3" style="font-size: 3rem;"></i>
+        <h5 class="text-muted">No Active Consultations</h5>
+        <p class="text-muted">You don't have any active video consultations.</p>
+      </div>
+    </div>
+
+    <div *ngFor="let consultation of activeConsultations" class="consultation-card mb-3">
+      <div class="card border-success">
+        <div class="card-body">
+          <div class="row align-items-center">
+            <div class="col-md-6">
+              <div class="d-flex align-items-center mb-2">
+                <div class="patient-avatar me-3 bg-success">
+                  <i class="fas fa-user-injured text-white"></i>
+                </div>
+                <div>
+                  <h6 class="mb-0">{{ consultation.patient.firstName }} {{ consultation.patient.lastName }}</h6>
+                  <small class="text-muted">{{ getTypeLabel(consultation.type) }}</small>
+                </div>
+              </div>
+            </div>
+            
+            <div class="col-md-3">
+              <div class="consultation-status">
+                <span class="badge bg-success">
+                  <i class="fas fa-circle me-1"></i>
+                  {{ consultation.status === 'IN_PROGRESS' ? 'In Progress' : 'Waiting' }}
+                </span>
+                <div class="mt-1">
+                  <small class="text-muted">Started: {{ formatTime(consultation.scheduledStartTime) }}</small>
+                </div>
+              </div>
+            </div>
+            
+            <div class="col-md-3 text-end">
+              <div class="consultation-actions">
+                <button 
+                  class="btn btn-primary btn-sm me-2"
+                  (click)="onJoinConsultation(consultation)">
+                  <i class="fas fa-video me-1"></i>
+                  Join
+                </button>
+                
+                <button 
+                  class="btn btn-outline-secondary btn-sm"
+                  (click)="onViewConsultation(consultation)">
+                  <i class="fas fa-eye me-1"></i>
+                  Details
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Completed Consultations -->
+  <div *ngIf="selectedTab === 'completed' && !isLoading" class="consultation-list">
+    <div *ngIf="completedConsultations.length === 0" class="empty-state">
+      <div class="text-center py-5">
+        <i class="fas fa-check-circle text-muted mb-3" style="font-size: 3rem;"></i>
+        <h5 class="text-muted">No Completed Consultations</h5>
+        <p class="text-muted">Your completed consultations will appear here.</p>
+      </div>
+    </div>
+
+    <div *ngFor="let consultation of completedConsultations" class="consultation-card mb-3">
+      <div class="card">
+        <div class="card-body">
+          <div class="row align-items-center">
+            <div class="col-md-6">
+              <div class="d-flex align-items-center mb-2">
+                <div class="patient-avatar me-3">
+                  <i class="fas fa-user-injured"></i>
+                </div>
+                <div>
+                  <h6 class="mb-0">{{ consultation.patient.firstName }} {{ consultation.patient.lastName }}</h6>
+                  <small class="text-muted">{{ getTypeLabel(consultation.type) }}</small>
+                </div>
+              </div>
+            </div>
+            
+            <div class="col-md-3">
+              <div class="consultation-info">
+                <div class="fw-bold">{{ formatDateTime(consultation.scheduledStartTime) }}</div>
+                <span class="badge" [class]="'bg-' + getStatusColor(consultation.status)">
+                  {{ consultation.status }}
+                </span>
+              </div>
+            </div>
+            
+            <div class="col-md-3 text-end">
+              <div class="consultation-actions">
+                <button 
+                  class="btn btn-outline-primary btn-sm"
+                  (click)="onViewConsultation(consultation)">
+                  <i class="fas fa-eye me-1"></i>
+                  View Details
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

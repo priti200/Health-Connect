@@ -1,0 +1,340 @@
+<div class="doctor-dashboard-container">
+  <!-- Loading State -->
+  <div *ngIf="isLoading" class="loading-state">
+    <div class="loading-content">
+      <div class="modern-spinner"></div>
+      <h4 class="loading-title">Loading Dashboard</h4>
+      <p class="loading-subtitle">Preparing your medical practice overview...</p>
+    </div>
+  </div>
+
+  <!-- Error State -->
+  <div *ngIf="error && !isLoading" class="error-state">
+    <div class="error-content">
+      <i class="bi bi-exclamation-triangle error-icon"></i>
+      <h4 class="error-title">Something went wrong</h4>
+      <p class="error-message">{{ error }}</p>
+      <button class="btn btn-primary" (click)="refreshData()">
+        <i class="bi bi-arrow-clockwise me-2"></i>Try Again
+      </button>
+    </div>
+  </div>
+
+  <!-- Dashboard Content -->
+  <div *ngIf="!isLoading && !error" class="dashboard-content">
+    <!-- Modern Doctor Header -->
+    <div class="doctor-header">
+      <div class="header-content">
+        <div class="welcome-section">
+          <div class="doctor-info">
+            <div class="greeting-text">
+              <h1 class="welcome-title">{{ getGreeting() }}, Dr. {{ currentUser?.fullName }}!</h1>
+              <div class="doctor-details">
+                <div class="specialization">
+                  <i class="bi bi-hospital"></i>
+                  <span>{{ currentUser?.specialization || 'General Practice' }}</span>
+                </div>
+                <div class="affiliation" *ngIf="currentUser?.affiliation">
+                  <i class="bi bi-building"></i>
+                  <span>{{ currentUser?.affiliation }}</span>
+                </div>
+                <div class="experience" *ngIf="currentUser?.yearsOfExperience">
+                  <i class="bi bi-award"></i>
+                  <span>{{ currentUser?.yearsOfExperience }} years experience</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="header-actions">
+            <button class="btn-modern btn-refresh" (click)="refreshData()">
+              <i class="bi bi-arrow-clockwise"></i>
+              <span>Refresh</span>
+            </button>
+          </div>
+        </div>
+        <div class="header-stats">
+          <div class="stat-item" *ngFor="let stat of dashboardStats">
+            <div class="stat-value">{{ stat.value }}</div>
+            <div class="stat-label">{{ stat.title }}</div>
+            <div class="stat-change" [class]="getChangeClass(stat.changeType)">
+              <i [class]="getChangeIcon(stat.changeType)"></i>
+              {{ stat.change }}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Today's Schedule Section -->
+    <div class="schedule-section">
+      <div class="section-header">
+        <h2 class="section-title">
+          <i class="bi bi-calendar-day section-icon"></i>
+          Today's Schedule
+        </h2>
+        <p class="section-subtitle">Manage your appointments and consultations</p>
+      </div>
+      <div class="schedule-content">
+        <div class="schedule-overview">
+          <div class="time-indicator">
+            <div class="current-time">
+              <span class="time">{{ getCurrentTime() }}</span>
+              <span class="date">{{ getCurrentDate() }}</span>
+            </div>
+          </div>
+          <div class="schedule-actions">
+            <button class="btn-modern btn-primary" (click)="navigateTo('/appointments')">
+              <i class="bi bi-calendar-plus"></i>
+              <span>Schedule New</span>
+            </button>
+            <button class="btn-modern btn-outline" (click)="navigateTo('/appointments')">
+              <span>View All</span>
+              <i class="bi bi-arrow-right"></i>
+            </button>
+          </div>
+        </div>
+
+        <div class="appointments-timeline">
+          <div *ngIf="realTodayAppointments.length === 0" class="empty-schedule">
+            <div class="empty-icon">
+              <i class="bi bi-calendar-x"></i>
+            </div>
+            <h4 class="empty-title">No appointments today</h4>
+            <p class="empty-subtitle">Your schedule is clear. Perfect time to catch up on patient notes or plan ahead.</p>
+            <button class="btn-modern btn-primary" (click)="navigateTo('/appointments')">
+              <i class="bi bi-calendar-plus me-2"></i>Schedule Appointment
+            </button>
+          </div>
+
+          <div class="appointment-timeline" *ngIf="realTodayAppointments.length > 0">
+            <div class="appointment-card-modern" *ngFor="let appointment of realTodayAppointments">
+              <div class="appointment-time-slot">
+                <div class="time-display">
+                  <span class="start-time">{{ appointment.startTime }}</span>
+                  <span class="duration">{{ appointment.endTime }}</span>
+                </div>
+                <div class="appointment-type-indicator" [class]="getAppointmentTypeClass(appointment.type)">
+                  <i class="bi bi-{{ getAppointmentTypeIcon(appointment.type) }}"></i>
+                </div>
+              </div>
+
+              <div class="appointment-details">
+                <div class="patient-info">
+                  <h4 class="patient-name">{{ appointment.patient.fullName }}</h4>
+                  <div class="appointment-meta">
+                    <span class="appointment-type">
+                      {{ appointment.type === 'VIDEO_CALL' ? 'Video Consultation' : 'In-Person Visit' }}
+                    </span>
+                    <span class="appointment-reason" *ngIf="appointment.reasonForVisit">
+                      • {{ appointment.reasonForVisit }}
+                    </span>
+                  </div>
+                  <div class="appointment-status">
+                    <span class="status-badge-modern" [class]="getStatusBadgeClass(appointment.status)">
+                      {{ appointment.status | titlecase }}
+                    </span>
+                  </div>
+                </div>
+
+                <div class="appointment-actions">
+                  <button
+                    *ngIf="appointment.type === 'VIDEO_CALL'"
+                    class="btn-modern btn-success"
+                    (click)="startVideoCall(appointment)"
+                  >
+                    <i class="bi bi-camera-video"></i>
+                    <span>Start Call</span>
+                  </button>
+                  <button
+                    *ngIf="appointment.type !== 'VIDEO_CALL'"
+                    class="btn-modern btn-primary"
+                    (click)="navigateTo('/appointments/' + appointment.id)"
+                  >
+                    <i class="bi bi-person"></i>
+                    <span>View Details</span>
+                  </button>
+                  <button class="btn-modern btn-outline" (click)="navigateTo('/chat')">
+                    <i class="bi bi-chat"></i>
+                    <span>Message</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Recent Activities & Quick Actions -->
+    <div class="activities-actions-section">
+      <div class="section-grid">
+        <!-- Recent Activities -->
+        <div class="activities-card">
+          <div class="modern-card">
+            <div class="card-header-modern">
+              <div class="header-left">
+                <div class="feature-icon activities-icon">
+                  <i class="bi bi-activity"></i>
+                </div>
+                <div class="header-text">
+                  <h3 class="card-title-modern">Recent Activities</h3>
+                  <p class="card-subtitle-modern">Latest updates from your practice</p>
+                </div>
+              </div>
+            </div>
+            <div class="card-content-modern">
+              <div class="activities-timeline">
+                <div class="activity-item-modern" *ngFor="let activity of recentActivities; last as isLast">
+                  <div class="activity-icon-container" [class]="activity.color + '-bg'">
+                    <i class="bi bi-{{ activity.icon }}"></i>
+                  </div>
+                  <div class="activity-content">
+                    <h4 class="activity-title">{{ activity.title }}</h4>
+                    <p class="activity-description">{{ activity.description }}</p>
+                    <span class="activity-time">{{ activity.time }}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="quick-actions-card">
+          <div class="modern-card">
+            <div class="card-header-modern">
+              <div class="header-left">
+                <div class="feature-icon actions-icon">
+                  <i class="bi bi-lightning"></i>
+                </div>
+                <div class="header-text">
+                  <h3 class="card-title-modern">Quick Actions</h3>
+                  <p class="card-subtitle-modern">Access frequently used features</p>
+                </div>
+              </div>
+            </div>
+            <div class="card-content-modern">
+              <div class="quick-actions-grid">
+                <button class="quick-action-btn" (click)="navigateTo('/patients')">
+                  <div class="action-icon patients-icon">
+                    <i class="bi bi-people"></i>
+                  </div>
+                  <span class="action-label">Manage Patients</span>
+                </button>
+                <button class="quick-action-btn" (click)="navigateTo('/appointments')">
+                  <div class="action-icon appointments-icon">
+                    <i class="bi bi-calendar-plus"></i>
+                  </div>
+                  <span class="action-label">Schedule</span>
+                </button>
+                <button class="quick-action-btn" (click)="navigateTo('/chat')">
+                  <div class="action-icon messages-icon">
+                    <i class="bi bi-chat-dots"></i>
+                  </div>
+                  <span class="action-label">Messages</span>
+                </button>
+                <button class="quick-action-btn" (click)="navigateTo('/reports')">
+                  <div class="action-icon reports-icon">
+                    <i class="bi bi-graph-up"></i>
+                  </div>
+                  <span class="action-label">Reports</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Messages Section -->
+    <div class="messages-section">
+      <div class="modern-card messages-card">
+        <div class="card-header-modern">
+          <div class="header-left">
+            <div class="feature-icon messages-icon">
+              <i class="bi bi-chat-dots"></i>
+            </div>
+            <div class="header-text">
+              <h3 class="card-title-modern">Recent Messages</h3>
+              <p class="card-subtitle-modern">Patient communications and inquiries</p>
+            </div>
+          </div>
+          <button class="btn-modern btn-outline" (click)="openChatModal()">
+            <span>View All</span>
+            <i class="bi bi-arrow-right"></i>
+          </button>
+        </div>
+        <div class="card-content-modern">
+          <div *ngIf="recentChats.length === 0" class="empty-state">
+            <div class="empty-icon">
+              <i class="bi bi-chat-square-text"></i>
+            </div>
+            <h4 class="empty-title">No messages yet</h4>
+            <p class="empty-subtitle">Patient messages and communications will appear here</p>
+          </div>
+
+          <div class="messages-list" *ngIf="recentChats.length > 0">
+            <div class="message-item-modern" *ngFor="let chat of recentChats">
+              <div class="patient-avatar">
+                <img
+                  [src]="chat.patient.avatar || '/assets/images/default-avatar.png'"
+                  [alt]="chat.patient.fullName"
+                  class="avatar-image">
+                <div class="online-indicator" *ngIf="chat.unreadCount > 0"></div>
+              </div>
+
+              <div class="message-content">
+                <div class="message-header">
+                  <h4 class="patient-name">{{ chat.patient.fullName }}</h4>
+                  <span class="message-time" *ngIf="chat.lastMessage">
+                    {{ formatChatTime(chat.lastMessage.createdAt) }}
+                  </span>
+                </div>
+                <p class="message-preview" *ngIf="chat.lastMessage">
+                  {{ chat.lastMessage.content | slice:0:60 }}{{ chat.lastMessage.content.length > 60 ? '...' : '' }}
+                </p>
+                <div class="message-meta">
+                  <span class="unread-badge" *ngIf="chat.unreadCount > 0">
+                    {{ chat.unreadCount }} new
+                  </span>
+                </div>
+              </div>
+
+              <div class="message-actions">
+                <button class="btn-modern btn-primary" (click)="openChat(chat)">
+                  <i class="bi bi-chat"></i>
+                  <span>Reply</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- Chat Modal -->
+<div class="modal fade" id="chatModal" tabindex="-1" aria-labelledby="chatModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-xl">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="chatModalLabel">
+          <i class="bi bi-chat-dots me-2"></i>Messages
+        </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body p-0" style="height: 600px;">
+        <div class="row h-100 g-0">
+          <div class="col-md-4 border-end">
+            <app-chat-list (chatSelected)="onChatSelected($event)"></app-chat-list>
+          </div>
+          <div class="col-md-8">
+            <app-chat-window #chatWindow></app-chat-window>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

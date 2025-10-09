@@ -1,0 +1,60 @@
+<div class="doctor-availability" [class]="'size-' + size">
+  <!-- Basic Status Indicator -->
+  <div class="status-indicator" [class]="getStatusClass()">
+    <i [class]="getStatusIcon()"></i>
+    <span *ngIf="size !== 'sm'" class="status-text ms-2">{{ getStatusText() }}</span>
+  </div>
+
+  <!-- Detailed Information -->
+  <div *ngIf="showDetails && availability && size !== 'sm'" class="availability-details mt-2">
+    
+    <!-- Expected Response Time -->
+    <div *ngIf="availability.expectedResponseTime" class="detail-item">
+      <i class="fas fa-clock text-muted me-2"></i>
+      <small class="text-muted">{{ availability.expectedResponseTime }}</small>
+    </div>
+
+    <!-- Chat Hours -->
+    <div *ngIf="availability.chatStartTime && availability.chatEndTime" class="detail-item">
+      <i class="fas fa-calendar-clock text-muted me-2"></i>
+      <small class="text-muted">
+        Chat hours: {{ availability.chatStartTime }} - {{ availability.chatEndTime }}
+      </small>
+    </div>
+
+    <!-- Custom Message -->
+    <div *ngIf="availability.customMessage" class="detail-item">
+      <i class="fas fa-comment text-muted me-2"></i>
+      <small class="text-muted">{{ availability.customMessage }}</small>
+    </div>
+
+    <!-- Last Seen (for offline status) -->
+    <div *ngIf="availability.status === 'OFFLINE' && availability.lastSeen" class="detail-item">
+      <i class="fas fa-eye text-muted me-2"></i>
+      <small class="text-muted">Last seen {{ getLastSeenText() }}</small>
+    </div>
+
+    <!-- Availability Warning -->
+    <div *ngIf="!isWithinChatHours()" class="availability-warning mt-2">
+      <div class="alert alert-warning py-1 px-2 mb-0">
+        <i class="fas fa-exclamation-triangle me-1"></i>
+        <small>Outside chat hours</small>
+      </div>
+    </div>
+
+    <!-- Status-specific Messages -->
+    <div *ngIf="availability.status === 'BUSY'" class="status-message mt-2">
+      <div class="alert alert-info py-1 px-2 mb-0">
+        <i class="fas fa-user-clock me-1"></i>
+        <small>Currently in consultation</small>
+      </div>
+    </div>
+
+    <div *ngIf="availability.status === 'DO_NOT_DISTURB'" class="status-message mt-2">
+      <div class="alert alert-danger py-1 px-2 mb-0">
+        <i class="fas fa-ban me-1"></i>
+        <small>Emergency contacts only</small>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,305 @@
+<div class="container-fluid py-4">
+  <div class="row justify-content-center">
+    <div class="col-lg-8">
+      <!-- Loading -->
+      <div *ngIf="loading" class="text-center py-5">
+        <div class="spinner-border text-primary" role="status">
+          <span class="visually-hidden">Loading...</span>
+        </div>
+        <p class="mt-2 text-muted">Loading appointment details...</p>
+      </div>
+
+      <!-- Premium Appointment Details -->
+      <div *ngIf="!loading && appointment" class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+          <h4 class="card-title mb-0">
+            <i class="bi bi-calendar-heart me-2"></i>Appointment Details
+          </h4>
+          <span class="badge badge-lg" [ngClass]="getStatusBadgeClass(appointment.status)">
+            {{ getStatusDisplayName(appointment.status) }}
+          </span>
+        </div>
+        <div class="card-body">
+          <!-- Success/Error Messages -->
+          <div *ngIf="success" class="alert alert-success" role="alert">
+            <i class="fas fa-check-circle me-2"></i>
+            {{ success }}
+          </div>
+          <div *ngIf="error" class="alert alert-danger" role="alert">
+            <i class="fas fa-exclamation-triangle me-2"></i>
+            {{ error }}
+          </div>
+
+          <!-- Appointment Information -->
+          <div class="row mb-4">
+            <div class="col-md-6">
+              <div class="info-card">
+                <h6 class="info-title">
+                  <i class="bi bi-person-heart"></i>
+                  {{ isDoctor() ? 'Patient' : 'Doctor' }}
+                </h6>
+                <p class="info-value">{{ getOtherParty() }}</p>
+                <p class="info-subtitle">{{ getOtherPartyDetails() }}</p>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="info-card">
+                <h6 class="info-title">
+                  <i class="bi bi-calendar-event"></i>
+                  Date & Time
+                </h6>
+                <p class="info-value">{{ formatDate(appointment.date) }}</p>
+                <p class="info-subtitle">
+                  {{ formatTime(appointment.startTime) }} - {{ formatTime(appointment.endTime) }}
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Edit Form -->
+          <form *ngIf="isEditing" [formGroup]="editForm" (ngSubmit)="onUpdate()">
+            <div class="row mb-3">
+              <div class="col-md-6">
+                <label for="status" class="form-label">Status</label>
+                <select id="status" class="form-select" formControlName="status">
+                  <option *ngFor="let option of statusOptions" [value]="option.value">
+                    {{ option.label }}
+                  </option>
+                </select>
+              </div>
+              <div class="col-md-6">
+                <label for="type" class="form-label">Type</label>
+                <select id="type" class="form-select" formControlName="type">
+                  <option *ngFor="let option of typeOptions" [value]="option.value">
+                    {{ option.label }}
+                  </option>
+                </select>
+              </div>
+            </div>
+
+            <div class="mb-3">
+              <label for="reasonForVisit" class="form-label">Reason for Visit</label>
+              <input 
+                type="text" 
+                id="reasonForVisit"
+                class="form-control"
+                formControlName="reasonForVisit">
+            </div>
+
+            <div class="mb-3">
+              <label for="notes" class="form-label">Notes</label>
+              <textarea 
+                id="notes"
+                class="form-control"
+                formControlName="notes"
+                rows="3"></textarea>
+            </div>
+
+            <div class="mb-3" *ngIf="editForm.get('type')?.value === 'VIDEO_CALL'">
+              <label for="meetingLink" class="form-label">Meeting Link</label>
+              <input 
+                type="url" 
+                id="meetingLink"
+                class="form-control"
+                formControlName="meetingLink"
+                placeholder="https://...">
+            </div>
+
+            <div class="d-flex justify-content-end">
+              <button 
+                type="button" 
+                class="btn btn-outline-secondary me-2"
+                (click)="toggleEdit()">
+                Cancel
+              </button>
+              <button 
+                type="submit" 
+                class="btn btn-primary"
+                [disabled]="editForm.invalid || updating">
+                <span *ngIf="updating" class="spinner-border spinner-border-sm me-2" role="status">
+                  <span class="visually-hidden">Loading...</span>
+                </span>
+                {{ updating ? 'Updating...' : 'Update Appointment' }}
+              </button>
+            </div>
+          </form>
+
+          <!-- View Mode -->
+          <div *ngIf="!isEditing">
+            <div class="row mb-4">
+              <div class="col-md-6">
+                <div class="info-card">
+                  <h6 class="info-title">
+                    <i class="bi bi-camera-video" *ngIf="appointment.type === 'VIDEO_CALL'"></i>
+                    <i class="bi bi-people" *ngIf="appointment.type === 'IN_PERSON'"></i>
+                    Appointment Type
+                  </h6>
+                  <p class="info-value">{{ getTypeDisplayName(appointment.type) }}</p>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="info-card">
+                  <h6 class="info-title">
+                    <i class="bi bi-clipboard2-pulse"></i>
+                    Reason for Visit
+                  </h6>
+                  <p class="info-value">{{ appointment.reasonForVisit || 'Not specified' }}</p>
+                </div>
+              </div>
+            </div>
+
+            <div *ngIf="appointment.notes" class="mb-4">
+              <div class="info-card">
+                <h6 class="info-title">
+                  <i class="bi bi-journal-text"></i>
+                  Notes
+                </h6>
+                <p class="info-value">{{ appointment.notes }}</p>
+              </div>
+            </div>
+
+            <!-- Premium Meeting Link -->
+            <div *ngIf="appointment.meetingLink && appointment.type === 'VIDEO_CALL'" class="mb-4">
+              <div class="info-card">
+                <h6 class="info-title">
+                  <i class="bi bi-camera-video"></i>
+                  Video Call
+                </h6>
+                <a
+                  [href]="appointment.meetingLink"
+                  target="_blank"
+                  class="btn btn-primary">
+                  <i class="bi bi-box-arrow-up-right me-2"></i>
+                  Join Meeting
+                </a>
+              </div>
+            </div>
+
+            <!-- Premium Appointment Metadata -->
+            <div class="row">
+              <div class="col-md-6">
+                <div class="info-card">
+                  <h6 class="info-title">
+                    <i class="bi bi-clock-history"></i>
+                    Created
+                  </h6>
+                  <p class="info-value">{{ appointment.createdAt | date:'medium' }}</p>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="info-card">
+                  <h6 class="info-title">
+                    <i class="bi bi-pencil-square"></i>
+                    Last Updated
+                  </h6>
+                  <p class="info-value">{{ appointment.updatedAt | date:'medium' }}</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Premium Actions -->
+          <div class="appointment-actions-container">
+            <!-- Back Button -->
+            <div class="back-button-section">
+              <button
+                class="btn btn-outline-secondary"
+                routerLink="/appointments">
+                <i class="bi bi-arrow-left me-2"></i>
+                Back to Appointments
+              </button>
+            </div>
+
+            <!-- Main Action Buttons -->
+            <div *ngIf="!isEditing" class="action-buttons-section">
+              <!-- Chat Access Buttons -->
+              <div class="chat-buttons-group">
+                <app-chat-access
+                  *ngIf="isBeforeAppointment()"
+                  [config]="{
+                    appointmentId: appointment.id,
+                    doctorId: appointment.doctor.id,
+                    patientId: appointment.patient.id,
+                    chatType: 'PRE_APPOINTMENT',
+                    subject: 'Pre-appointment discussion for ' + appointment.date,
+                    buttonText: 'Chat Before Appointment',
+                    buttonClass: 'btn-teal',
+                    size: 'sm'
+                  }">
+                </app-chat-access>
+
+                <app-chat-access
+                  *ngIf="isAfterAppointment()"
+                  [config]="{
+                    appointmentId: appointment.id,
+                    doctorId: appointment.doctor.id,
+                    patientId: appointment.patient.id,
+                    chatType: 'POST_APPOINTMENT',
+                    subject: 'Follow-up for appointment on ' + appointment.date,
+                    buttonText: 'Follow-up Chat',
+                    buttonClass: 'btn-teal-outline',
+                    size: 'sm'
+                  }">
+                </app-chat-access>
+
+                <app-chat-access
+                  [config]="{
+                    doctorId: appointment.doctor.id,
+                    patientId: appointment.patient.id,
+                    chatType: 'GENERAL',
+                    buttonText: 'General Chat',
+                    buttonClass: 'btn-teal-outline',
+                    size: 'sm'
+                  }">
+                </app-chat-access>
+              </div>
+
+              <!-- Video Consultation Buttons -->
+              <div class="video-buttons-group" *ngIf="appointment.type === 'VIDEO_CALL'">
+                <button
+                  *ngIf="canStartVideoConsultation()"
+                  class="btn btn-teal"
+                  (click)="onStartVideoConsultation()"
+                  [disabled]="loading">
+                  <i class="bi bi-camera-video me-2"></i>
+                  <span *ngIf="!loading">Start Video Consultation</span>
+                  <span *ngIf="loading">
+                    <i class="bi bi-arrow-clockwise spin me-2"></i>
+                    Starting...
+                  </span>
+                </button>
+
+                <button
+                  *ngIf="!canStartVideoConsultation() && appointment.type === 'VIDEO_CALL' && isBeforeOrDuringAppointment()"
+                  class="btn btn-teal"
+                  (click)="onJoinVideoConsultation()"
+                  [disabled]="loading">
+                  <i class="bi bi-camera-video me-2"></i>
+                  Join Video Consultation
+                </button>
+              </div>
+
+              <!-- Management Buttons -->
+              <div class="management-buttons-group">
+                <button
+                  *ngIf="canEdit()"
+                  class="btn btn-teal-outline"
+                  (click)="toggleEdit()">
+                  <i class="bi bi-pencil me-2"></i>
+                  Edit
+                </button>
+                <button
+                  *ngIf="canCancel()"
+                  class="btn btn-outline-danger"
+                  (click)="onCancel()">
+                  <i class="bi bi-x-circle me-2"></i>
+                  Cancel Appointment
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

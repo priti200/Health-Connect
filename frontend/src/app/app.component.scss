@@ -1,0 +1,307 @@
+// Clean Medical Navigation Styles
+@import '../styles/design-system.scss';
+
+// ===== CLEAN NAVIGATION =====
+.hc-navbar {
+  background: var(--hc-white);
+  border-bottom: 1px solid var(--hc-primary-100);
+  box-shadow: 0 1px 3px rgba(20, 184, 166, 0.1);
+  position: sticky;
+  top: 0;
+  z-index: var(--hc-z-sticky);
+
+  .hc-navbar-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 var(--hc-space-6);
+    height: 64px;
+  }
+}
+
+// ===== SIMPLE BRAND =====
+.hc-brand {
+  display: flex;
+  align-items: center;
+  gap: var(--hc-space-3);
+  cursor: pointer;
+  transition: all var(--hc-transition-fast);
+
+  &:hover {
+    opacity: 0.9;
+
+    .hc-logo {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 16px rgba(20, 184, 166, 0.3);
+    }
+  }
+
+  .hc-logo {
+    width: 36px;
+    height: 36px;
+    background: linear-gradient(135deg, #0d9488, #0f766e);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 1.1rem;
+    box-shadow: 0 4px 12px rgba(20, 184, 166, 0.2);
+    transition: all 0.3s ease;
+  }
+
+  .hc-brand-name {
+    font-size: var(--hc-text-xl);
+    font-weight: var(--hc-font-bold);
+    color: var(--hc-primary-700);
+  }
+}
+
+// ===== CLEAN NAVIGATION MENU =====
+.hc-nav-menu {
+  display: flex;
+  align-items: center;
+  gap: var(--hc-space-1);
+
+  .hc-nav-link {
+    display: flex;
+    align-items: center;
+    gap: var(--hc-space-2);
+    padding: var(--hc-space-2) var(--hc-space-4);
+    border-radius: var(--hc-radius-md);
+    text-decoration: none;
+    color: var(--hc-gray-600);
+    font-weight: var(--hc-font-medium);
+    font-size: var(--hc-text-sm);
+    transition: all var(--hc-transition-fast);
+
+    &:hover {
+      background: var(--hc-primary-50);
+      color: var(--hc-primary-700);
+    }
+
+    &.active {
+      background: var(--hc-primary-100);
+      color: var(--hc-primary-700);
+    }
+
+    i {
+      font-size: 0.9rem;
+      width: 16px;
+      text-align: center;
+    }
+
+    span {
+      white-space: nowrap;
+    }
+  }
+}
+
+// ===== USER SECTION =====
+.hc-user-section {
+  display: flex;
+  align-items: center;
+  gap: var(--hc-space-3);
+}
+
+.hc-user-menu {
+  position: relative;
+
+  .hc-user-btn {
+    display: flex;
+    align-items: center;
+    gap: var(--hc-space-2);
+    padding: var(--hc-space-2);
+    border: none;
+    background: none;
+    border-radius: var(--hc-radius-md);
+    cursor: pointer;
+    transition: all var(--hc-transition-fast);
+
+    &:hover {
+      background: var(--hc-primary-50);
+    }
+
+    .hc-avatar {
+      width: 32px;
+      height: 32px;
+      background: var(--hc-primary-600);
+      color: var(--hc-white);
+      border-radius: var(--hc-radius-md);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: var(--hc-text-sm);
+      font-weight: var(--hc-font-semibold);
+    }
+
+    .hc-user-name {
+      color: var(--hc-gray-700);
+      font-weight: var(--hc-font-medium);
+      font-size: var(--hc-text-sm);
+    }
+
+    i {
+      color: var(--hc-gray-400);
+      font-size: var(--hc-text-xs);
+      transition: transform var(--hc-transition-fast);
+    }
+  }
+
+  &.open .hc-user-btn i {
+    transform: rotate(180deg);
+  }
+}
+
+// ===== DROPDOWN =====
+.hc-dropdown {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  width: 180px;
+  background: var(--hc-white);
+  border: 1px solid var(--hc-primary-100);
+  border-radius: var(--hc-radius-lg);
+  box-shadow: var(--hc-shadow-lg);
+  z-index: var(--hc-z-dropdown);
+  margin-top: var(--hc-space-2);
+  overflow: hidden;
+
+  .hc-dropdown-link {
+    display: flex;
+    align-items: center;
+    gap: var(--hc-space-3);
+    padding: var(--hc-space-3) var(--hc-space-4);
+    text-decoration: none;
+    color: var(--hc-gray-700);
+    font-size: var(--hc-text-sm);
+    transition: all var(--hc-transition-fast);
+    cursor: pointer;
+
+    &:hover {
+      background: var(--hc-primary-50);
+      color: var(--hc-primary-700);
+    }
+
+    i {
+      width: 16px;
+      color: var(--hc-gray-500);
+      font-size: 0.9rem;
+    }
+  }
+}
+
+// ===== MOBILE =====
+.hc-mobile-btn {
+  display: none;
+  width: 36px;
+  height: 36px;
+  border: none;
+  background: var(--hc-primary-50);
+  color: var(--hc-primary-600);
+  border-radius: var(--hc-radius-md);
+  cursor: pointer;
+
+  &:hover {
+    background: var(--hc-primary-100);
+  }
+}
+
+.hc-mobile-menu {
+  display: none;
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: var(--hc-white);
+  border-top: 1px solid var(--hc-primary-100);
+  box-shadow: var(--hc-shadow-lg);
+  z-index: var(--hc-z-dropdown);
+
+  &.open {
+    display: block;
+  }
+
+  .hc-mobile-link {
+    display: flex;
+    align-items: center;
+    gap: var(--hc-space-3);
+    padding: var(--hc-space-4) var(--hc-space-6);
+    text-decoration: none;
+    color: var(--hc-gray-700);
+    font-weight: var(--hc-font-medium);
+    border-bottom: 1px solid var(--hc-primary-50);
+
+    &:hover {
+      background: var(--hc-primary-50);
+      color: var(--hc-primary-700);
+    }
+
+    i {
+      width: 20px;
+      color: var(--hc-gray-500);
+    }
+  }
+
+  .hc-mobile-divider {
+    height: 1px;
+    background: var(--hc-primary-100);
+    margin: var(--hc-space-2) 0;
+  }
+}
+
+// ===== MAIN CONTENT =====
+.main-content {
+  min-height: calc(100vh - 64px);
+  background: var(--hc-white);
+}
+
+// ===== RESPONSIVE DESIGN =====
+@media (max-width: 768px) {
+  .hc-navbar-container {
+    padding: 0 var(--hc-space-4);
+  }
+
+  .hc-nav-menu {
+    display: none;
+  }
+
+  .hc-mobile-btn {
+    display: flex;
+  }
+
+  .hc-user-name {
+    display: none;
+  }
+
+  .hc-brand-name {
+    font-size: var(--hc-text-lg);
+  }
+}
+
+@media (max-width: 480px) {
+  .hc-navbar-container {
+    padding: 0 var(--hc-space-3);
+    height: 56px;
+  }
+
+  .hc-logo {
+    width: 32px;
+    height: 32px;
+    font-size: 1rem;
+  }
+
+  .hc-brand-name {
+    font-size: var(--hc-text-base);
+  }
+
+  .hc-avatar {
+    width: 28px !important;
+    height: 28px !important;
+    font-size: 0.75rem !important;
+  }
+}
+
+

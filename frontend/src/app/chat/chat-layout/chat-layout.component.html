@@ -1,0 +1,157 @@
+<div class="chat-layout">
+  <div class="chat-sidebar">
+    <!-- Chat Header with New Chat Button -->
+    <div class="chat-sidebar-header">
+      <h5 class="mb-0">
+        <i class="bi bi-chat-dots me-2"></i>
+        Messages
+      </h5>
+      <button
+        class="btn btn-primary btn-sm"
+        (click)="openNewChatModal()"
+        title="Start new conversation">
+        <i class="bi bi-plus-lg"></i>
+      </button>
+    </div>
+
+    <!-- WebSocket Connection Status -->
+    <app-websocket-status></app-websocket-status>
+
+    <!-- Chat List -->
+    <div class="chat-sidebar-body">
+      <div *ngIf="loading" class="text-center p-3">
+        <div class="spinner-border spinner-border-sm" role="status">
+          <span class="visually-hidden">Loading...</span>
+        </div>
+        <div class="mt-2">Loading chats...</div>
+      </div>
+
+      <div *ngIf="!loading && chats.length === 0" class="text-center p-4 text-muted">
+        <i class="bi bi-chat-square-text fs-1 mb-3 d-block"></i>
+        <p>No conversations yet</p>
+        <small>Click the + button to start a conversation</small>
+      </div>
+
+      <div *ngIf="!loading && chats.length > 0" class="chat-items">
+        <div 
+          *ngFor="let chat of chats" 
+          class="chat-item"
+          [class.active]="selectedChat?.id === chat.id"
+          (click)="selectChat(chat)">
+          
+          <div class="chat-avatar">
+            <img 
+              [src]="getOtherParticipant(chat).avatar || '/assets/images/default-avatar.png'" 
+              [alt]="getOtherParticipant(chat).fullName"
+              class="avatar-img">
+            <span class="online-indicator" *ngIf="false"></span>
+          </div>
+
+          <div class="chat-content">
+            <div class="chat-header">
+              <h6 class="chat-name mb-0">
+                {{ getOtherParticipant(chat).fullName }}
+              </h6>
+              <small class="chat-time text-muted">
+                {{ chat.lastMessage ? formatLastMessageTime(chat.lastMessage.createdAt) : formatLastMessageTime(chat.createdAt) }}
+              </small>
+            </div>
+
+            <div class="chat-preview">
+              <p class="mb-0 text-muted" *ngIf="chat.lastMessage">
+                <span *ngIf="chat.lastMessage.sender.id === currentUser?.id" class="me-1">
+                  <i class="bi bi-check2-all"
+                     [class.text-primary]="chat.lastMessage.status === 'READ'"
+                     [class.text-muted]="chat.lastMessage.status !== 'READ'"></i>
+                </span>
+                {{ chat.lastMessage.content | slice:0:50 }}{{ chat.lastMessage.content.length > 50 ? '...' : '' }}
+              </p>
+              <p class="mb-0 text-muted" *ngIf="!chat.lastMessage">
+                <em>No messages yet</em>
+              </p>
+            </div>
+          </div>
+
+          <div class="chat-meta">
+            <span 
+              *ngIf="chat.unreadCount > 0" 
+              class="badge bg-primary rounded-pill">
+              {{ chat.unreadCount }}
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Chat Window -->
+  <div class="chat-main">
+    <app-chat-window 
+      [chat]="selectedChat"
+      (messagesSent)="onMessageSent()">
+    </app-chat-window>
+  </div>
+</div>
+
+<!-- New Chat Modal -->
+<div class="modal fade" [class.show]="showNewChatModal" [style.display]="showNewChatModal ? 'block' : 'none'" 
+     tabindex="-1" *ngIf="showNewChatModal">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Start New Conversation</h5>
+        <button type="button" class="btn-close" (click)="showNewChatModal = false"></button>
+      </div>
+      <div class="modal-body">
+        <div *ngIf="loadingDoctors" class="text-center p-3">
+          <div class="spinner-border spinner-border-sm" role="status">
+            <span class="visually-hidden">Loading...</span>
+          </div>
+          <div class="mt-2">Loading available contacts...</div>
+        </div>
+
+        <div *ngIf="!loadingDoctors && availableDoctors.length === 0" class="text-center p-3 text-muted">
+          <i class="bi bi-person-x fs-1 mb-3 d-block"></i>
+          <p>No contacts available</p>
+        </div>
+
+        <div *ngIf="!loadingDoctors && availableDoctors.length > 0">
+          <div class="mb-3">
+            <input
+              type="text"
+              class="form-control"
+              placeholder="Search contacts..."
+              [(ngModel)]="doctorSearchTerm"
+              (input)="filterDoctors()">
+          </div>
+
+          <div class="contact-list">
+            <div
+              *ngFor="let contact of filteredDoctors"
+              class="contact-item"
+              (click)="startChatWithDoctor(contact)">
+              <img
+                [src]="contact.avatar || 'assets/images/default-avatar.svg'"
+                [alt]="contact.fullName"
+                class="contact-avatar">
+              <div class="contact-info">
+                <h6 class="mb-0">{{ contact.fullName }}</h6>
+                <small class="text-muted">{{ contact.specialization || contact.role }}</small>
+                <div class="contact-details" *ngIf="contact.yearsOfExperience">
+                  <small class="text-muted">{{ contact.yearsOfExperience }} years experience</small>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" (click)="showNewChatModal = false">Cancel</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Backdrop -->
+<div class="modal-backdrop fade" [class.show]="showNewChatModal" *ngIf="showNewChatModal" 
+     (click)="showNewChatModal = false"></div>

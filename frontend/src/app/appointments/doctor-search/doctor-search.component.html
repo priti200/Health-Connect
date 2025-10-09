@@ -1,0 +1,130 @@
+<div class="container-fluid py-4">
+  <div class="row">
+    <div class="col-12">
+      <div class="card">
+        <div class="card-header">
+          <h4 class="card-title mb-0">
+            <i class="fas fa-user-md me-2"></i>Find a Doctor
+          </h4>
+        </div>
+        <div class="card-body">
+          <!-- Search Form -->
+          <form [formGroup]="searchForm" (ngSubmit)="onSearch()" class="mb-4">
+            <div class="row">
+              <div class="col-md-6">
+                <label for="specialization" class="form-label">Specialization</label>
+                <select 
+                  id="specialization" 
+                  class="form-select" 
+                  formControlName="specialization">
+                  <option value="">All Specializations</option>
+                  <option *ngFor="let spec of specializations" [value]="spec">
+                    {{ spec }}
+                  </option>
+                </select>
+              </div>
+              <div class="col-md-6 d-flex align-items-end">
+                <button 
+                  type="submit" 
+                  class="btn btn-primary me-2"
+                  [disabled]="loading">
+                  <i class="fas fa-search me-1"></i>
+                  {{ loading ? 'Searching...' : 'Search' }}
+                </button>
+                <button 
+                  type="button" 
+                  class="btn btn-outline-secondary"
+                  (click)="onClearSearch()">
+                  <i class="fas fa-times me-1"></i>
+                  Clear
+                </button>
+              </div>
+            </div>
+          </form>
+
+          <!-- Error Message -->
+          <div *ngIf="error" class="alert alert-danger" role="alert">
+            <i class="fas fa-exclamation-triangle me-2"></i>
+            {{ error }}
+          </div>
+
+          <!-- Loading Spinner -->
+          <div *ngIf="loading" class="text-center py-4">
+            <div class="spinner-border text-primary" role="status">
+              <span class="visually-hidden">Loading...</span>
+            </div>
+            <p class="mt-2 text-muted">Searching for doctors...</p>
+          </div>
+
+          <!-- Doctors List -->
+          <div *ngIf="!loading && doctors.length > 0" class="row">
+            <div class="col-md-6 col-lg-4 mb-4" *ngFor="let doctor of doctors">
+              <div class="card h-100 doctor-card">
+                <div class="card-body">
+                  <div class="d-flex align-items-center mb-3">
+                    <div class="avatar-circle me-3">
+                      <i class="fas fa-user-md"></i>
+                    </div>
+                    <div>
+                      <h5 class="card-title mb-1">{{ doctor.fullName }}</h5>
+                      <p class="text-muted mb-0">{{ doctor.specialization || 'General Practice' }}</p>
+                    </div>
+                  </div>
+                  
+                  <div class="doctor-info">
+                    <p class="mb-2" *ngIf="doctor.affiliation">
+                      <i class="fas fa-hospital me-2 text-muted"></i>
+                      {{ doctor.affiliation }}
+                    </p>
+                    <p class="mb-2">
+                      <i class="fas fa-clock me-2 text-muted"></i>
+                      {{ getExperienceText(doctor.yearsOfExperience) }}
+                    </p>
+                    <p class="mb-3">
+                      <i class="fas fa-envelope me-2 text-muted"></i>
+                      {{ doctor.email }}
+                    </p>
+                  </div>
+                  
+                  <div class="d-grid gap-2">
+                    <button
+                      class="btn btn-primary"
+                      (click)="bookAppointment(doctor)">
+                      <i class="fas fa-calendar-plus me-2"></i>
+                      Book Appointment
+                    </button>
+
+                    <!-- Chat Access -->
+                    <app-chat-access
+                      [config]="{
+                        doctorId: doctor.id,
+                        chatType: 'GENERAL',
+                        buttonText: 'Start Chat',
+                        buttonClass: 'btn-outline-info',
+                        size: 'sm'
+                      }">
+                    </app-chat-access>
+
+                    <!-- Doctor Availability -->
+                    <app-doctor-availability
+                      [doctorId]="doctor.id"
+                      [showDetails]="true"
+                      size="sm">
+                    </app-doctor-availability>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- No Doctors Found -->
+          <div *ngIf="!loading && doctors.length === 0" class="text-center py-5">
+            <i class="fas fa-user-md fa-3x text-muted mb-3"></i>
+            <h5 class="text-muted">No doctors found</h5>
+            <p class="text-muted">Try adjusting your search criteria or check back later.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

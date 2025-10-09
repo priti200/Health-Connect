@@ -1,0 +1,336 @@
+<div class="container-fluid py-4">
+  <!-- Loading State -->
+  <div *ngIf="isLoading" class="text-center py-5">
+    <div class="spinner-border text-primary" role="status">
+      <span class="visually-hidden">Loading...</span>
+    </div>
+    <p class="mt-3 text-muted">Loading consultation details...</p>
+  </div>
+
+  <!-- Error State -->
+  <div *ngIf="error && !isLoading" class="alert alert-danger" role="alert">
+    <i class="fas fa-exclamation-triangle me-2"></i>
+    {{ error }}
+    <button class="btn btn-outline-danger btn-sm ms-3" (click)="loadConsultation()">
+      <i class="fas fa-redo me-1"></i>
+      Retry
+    </button>
+  </div>
+
+  <!-- Consultation Details -->
+  <div *ngIf="consultation && !isLoading" class="row">
+    <!-- Main Content -->
+    <div class="col-lg-8">
+      <div class="card shadow-sm">
+        <div class="card-header bg-primary text-white">
+          <div class="d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">
+              <i class="fas fa-video me-2"></i>
+              Video Consultation
+            </h5>
+            <span class="badge" [ngClass]="'bg-' + getStatusColor(consultation.status)">
+              {{ consultation.status | titlecase }}
+            </span>
+          </div>
+        </div>
+        
+        <div class="card-body">
+          <!-- Consultation Info -->
+          <div class="row mb-4">
+            <div class="col-md-6">
+              <div class="info-item">
+                <label class="text-muted small">Consultation Type</label>
+                <p class="mb-2">{{ getTypeLabel(consultation.type) }}</p>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="info-item">
+                <label class="text-muted small">Room ID</label>
+                <p class="mb-2 font-monospace">{{ consultation.id }}</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="row mb-4">
+            <div class="col-md-6">
+              <div class="info-item">
+                <label class="text-muted small">Scheduled Time</label>
+                <p class="mb-2">{{ formatDateTime(consultation.scheduledStartTime) }}</p>
+              </div>
+            </div>
+            <div class="col-md-6" *ngIf="consultation.actualStartTime">
+              <div class="info-item">
+                <label class="text-muted small">Started At</label>
+                <p class="mb-2">{{ formatDateTime(consultation.actualStartTime) }}</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="row mb-4" *ngIf="consultation.endTime">
+            <div class="col-md-6">
+              <div class="info-item">
+                <label class="text-muted small">Ended At</label>
+                <p class="mb-2">{{ formatDateTime(consultation.endTime) }}</p>
+              </div>
+            </div>
+            <div class="col-md-6" *ngIf="consultation.durationMinutes">
+              <div class="info-item">
+                <label class="text-muted small">Duration</label>
+                <p class="mb-2">{{ formatDuration(consultation.durationMinutes) }}</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Consultation Features -->
+          <div class="row mb-4">
+            <div class="col-12">
+              <label class="text-muted small">Available Features</label>
+              <div class="d-flex flex-wrap gap-2 mt-2">
+                <span class="badge bg-success" *ngIf="consultation.chatEnabled">
+                  <i class="fas fa-comments me-1"></i>
+                  Chat Enabled
+                </span>
+                <span class="badge bg-info" *ngIf="consultation.screenSharingEnabled">
+                  <i class="fas fa-desktop me-1"></i>
+                  Screen Sharing
+                </span>
+                <span class="badge bg-warning" *ngIf="consultation.recordingEnabled">
+                  <i class="fas fa-record-vinyl me-1"></i>
+                  Recording Enabled
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Action Buttons -->
+          <div class="d-flex gap-3 flex-wrap">
+            <button 
+              *ngIf="canStart()" 
+              class="btn btn-success btn-lg"
+              (click)="onStartConsultation()">
+              <i class="fas fa-play me-2"></i>
+              Start Consultation
+            </button>
+
+            <button 
+              *ngIf="canJoin() && !canStart()" 
+              class="btn btn-primary btn-lg"
+              (click)="onJoinConsultation()">
+              <i class="fas fa-video me-2"></i>
+              Join Consultation
+            </button>
+
+            <button 
+              *ngIf="canEnd()" 
+              class="btn btn-danger"
+              (click)="onEndConsultation()">
+              <i class="fas fa-stop me-2"></i>
+              End Consultation
+            </button>
+
+            <button 
+              class="btn btn-outline-secondary"
+              routerLink="/telemedicine/consultations">
+              <i class="fas fa-arrow-left me-2"></i>
+              Back to Consultations
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Waiting for Participants -->
+      <div *ngIf="isWaitingForParticipants && userRole === 'host'" class="card shadow-sm mt-4">
+        <div class="card-header bg-warning text-dark">
+          <h5 class="mb-0">
+            <i class="fas fa-clock me-2"></i>
+            Waiting for Patient to Join
+          </h5>
+        </div>
+        <div class="card-body text-center py-5">
+          <div class="spinner-border text-warning mb-3" role="status">
+            <span class="visually-hidden">Waiting...</span>
+          </div>
+          <h6>Video call started successfully!</h6>
+          <p class="text-muted">The patient will receive a notification to join the call.</p>
+          <div class="mt-3">
+            <button class="btn btn-outline-danger" (click)="endVideoCall()">
+              <i class="fas fa-phone-slash me-2"></i>
+              End Call
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Video Calling Interface -->
+      <div *ngIf="isVideoCallActive && !isWaitingForParticipants" class="card shadow-sm mt-4">
+        <div class="card-header bg-success text-white">
+          <div class="d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">
+              <i class="fas fa-video me-2"></i>
+              Video Call Active - {{ currentUser?.role === 'DOCTOR' ? 'Doctor View' : 'Patient View' }}
+            </h5>
+            <div class="d-flex gap-2">
+              <button
+                class="btn btn-sm"
+                [ngClass]="isVideoEnabled ? 'btn-light' : 'btn-danger'"
+                (click)="toggleVideo()"
+                title="Toggle Video">
+                <i class="fas" [ngClass]="isVideoEnabled ? 'fa-video' : 'fa-video-slash'"></i>
+              </button>
+              <button
+                class="btn btn-sm"
+                [ngClass]="isAudioEnabled ? 'btn-light' : 'btn-danger'"
+                (click)="toggleAudio()"
+                title="Toggle Audio">
+                <i class="fas" [ngClass]="isAudioEnabled ? 'fa-microphone' : 'fa-microphone-slash'"></i>
+              </button>
+              <button
+                class="btn btn-sm btn-danger"
+                (click)="endVideoCall()"
+                title="End Call">
+                <i class="fas fa-phone-slash"></i>
+                End Call
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="card-body p-0">
+          <div class="video-container">
+            <!-- Main Video Area -->
+            <div class="main-video-area">
+              <video
+                #localVideo
+                autoplay
+                muted
+                playsinline
+                class="main-video">
+              </video>
+              <div class="video-overlay">
+                <div class="participant-info">
+                  <i class="fas fa-user-circle me-2"></i>
+                  You ({{ currentUser?.fullName }})
+                </div>
+              </div>
+            </div>
+
+            <!-- Picture-in-Picture for Remote -->
+            <div class="pip-video-wrapper">
+              <video
+                #remoteVideo
+                autoplay
+                playsinline
+                class="pip-video">
+              </video>
+              <div class="pip-label">
+                {{ currentUser?.role === 'DOCTOR' ? 'Patient' : 'Doctor' }}
+              </div>
+            </div>
+          </div>
+
+          <!-- Video Call Controls -->
+          <div class="video-controls p-3 bg-dark text-white">
+            <div class="row align-items-center">
+              <div class="col-md-3">
+                <div class="d-flex align-items-center">
+                  <div class="status-indicator me-2"
+                       [ngClass]="{
+                         'bg-success': connectionStatus === 'connected',
+                         'bg-warning': connectionStatus === 'connecting',
+                         'bg-danger': connectionStatus === 'disconnected' || connectionStatus === 'error'
+                       }"></div>
+                  <span class="fw-bold">{{ connectionStatus | titlecase }}</span>
+                </div>
+              </div>
+              <div class="col-md-3">
+                <div class="d-flex align-items-center">
+                  <i class="fas fa-microphone me-1" [ngClass]="isAudioEnabled ? 'text-success' : 'text-danger'"></i>
+                  <span class="small">{{ isAudioEnabled ? 'Audio On' : 'Audio Off' }}</span>
+                </div>
+              </div>
+              <div class="col-md-3 text-center">
+                <div class="call-duration">
+                  <i class="fas fa-clock me-1"></i>
+                  <span id="callTimer">00:00</span>
+                </div>
+              </div>
+              <div class="col-md-3 text-end">
+                <span class="text-success small">
+                  <i class="fas fa-shield-alt me-1"></i>
+                  Secure
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Sidebar -->
+    <div class="col-lg-4">
+      <!-- Participants -->
+      <div class="card shadow-sm mb-4">
+        <div class="card-header">
+          <h6 class="mb-0">
+            <i class="fas fa-users me-2"></i>
+            Participants
+          </h6>
+        </div>
+        <div class="card-body">
+          <!-- Doctor -->
+          <div class="participant-item mb-3">
+            <div class="d-flex align-items-center">
+              <div class="avatar-circle bg-primary text-white me-3">
+                <i class="fas fa-user-md"></i>
+              </div>
+              <div>
+                <h6 class="mb-0">{{ consultation.doctor.fullName }}</h6>
+                <small class="text-muted">{{ consultation.doctor.specialization }}</small>
+              </div>
+            </div>
+          </div>
+
+          <!-- Patient -->
+          <div class="participant-item">
+            <div class="d-flex align-items-center">
+              <div class="avatar-circle bg-info text-white me-3">
+                <i class="fas fa-user"></i>
+              </div>
+              <div>
+                <h6 class="mb-0">{{ consultation.patient.fullName }}</h6>
+                <small class="text-muted">Patient</small>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Appointment Details -->
+      <div class="card shadow-sm" *ngIf="consultation.appointment">
+        <div class="card-header">
+          <h6 class="mb-0">
+            <i class="fas fa-calendar me-2"></i>
+            Related Appointment
+          </h6>
+        </div>
+        <div class="card-body">
+          <p class="mb-2">
+            <strong>Date:</strong> {{ consultation.appointment.date | date }}
+          </p>
+          <p class="mb-2">
+            <strong>Time:</strong> {{ consultation.appointment.startTime }} - {{ consultation.appointment.endTime }}
+          </p>
+          <p class="mb-2" *ngIf="consultation.appointment.reasonForVisit">
+            <strong>Reason:</strong> {{ consultation.appointment.reasonForVisit }}
+          </p>
+          <button 
+            class="btn btn-outline-primary btn-sm"
+            [routerLink]="['/appointments', consultation.appointment.id]">
+            <i class="fas fa-external-link-alt me-1"></i>
+            View Appointment
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

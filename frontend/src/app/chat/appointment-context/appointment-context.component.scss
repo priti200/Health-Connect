@@ -1,0 +1,129 @@
+.appointment-context-card {
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  border: 1px solid #dee2e6;
+  border-radius: 12px;
+  margin-bottom: 1rem;
+  overflow: hidden;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.context-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem;
+  background: white;
+  border-bottom: 1px solid #dee2e6;
+  
+  h6 {
+    color: #495057;
+  }
+}
+
+.appointment-summary {
+  padding: 1rem;
+}
+
+.summary-item {
+  display: flex;
+  align-items: center;
+  margin-bottom: 0.5rem;
+  
+  &:last-child {
+    margin-bottom: 0;
+  }
+  
+  i {
+    width: 16px;
+    text-align: center;
+  }
+}
+
+.badge {
+  font-size: 0.75rem;
+  
+  &.badge-pending {
+    background-color: #ffc107;
+    color: #000;
+  }
+  
+  &.badge-scheduled {
+    background-color: #17a2b8;
+    color: white;
+  }
+  
+  &.badge-confirmed {
+    background-color: #28a745;
+    color: white;
+  }
+  
+  &.badge-completed {
+    background-color: #6c757d;
+    color: white;
+  }
+  
+  &.badge-cancelled {
+    background-color: #dc3545;
+    color: white;
+  }
+}
+
+.time-context {
+  .alert {
+    border-radius: 8px;
+    font-size: 0.875rem;
+  }
+}
+
+.quick-actions {
+  padding: 0 1rem 1rem;
+  
+  .btn {
+    border-radius: 6px;
+    font-size: 0.875rem;
+  }
+}
+
+// Responsive design
+@media (max-width: 768px) {
+  .context-header {
+    padding: 0.75rem;
+  }
+  
+  .appointment-summary {
+    padding: 0.75rem;
+  }
+  
+  .quick-actions {
+    padding: 0 0.75rem 0.75rem;
+    
+    .btn-group {
+      flex-direction: column;
+      
+      .btn {
+        border-radius: 6px !important;
+        margin-bottom: 0.25rem;
+        
+        &:last-child {
+          margin-bottom: 0;
+        }
+      }
+    }
+  }
+}
+
+// Animation
+.appointment-context-card {
+  animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

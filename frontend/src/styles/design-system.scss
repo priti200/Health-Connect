@@ -1,0 +1,301 @@
+// HealthConnect Design System
+// Professional Medical Web Application Design
+
+// ===== CONSISTENT TEAL & WHITE COLOR PALETTE =====
+:root {
+  // Primary Teal Colors (Main Brand Color)
+  --hc-primary-50: #f0fdfa;
+  --hc-primary-100: #ccfbf1;
+  --hc-primary-200: #99f6e4;
+  --hc-primary-300: #5eead4;
+  --hc-primary-400: #2dd4bf;
+  --hc-primary-500: #14b8a6;
+  --hc-primary-600: #0d9488;
+  --hc-primary-700: #0f766e;
+  --hc-primary-800: #115e59;
+  --hc-primary-900: #134e4a;
+
+  // Teal Variants for Different States
+  --hc-teal-light: #5eead4;
+  --hc-teal-main: #14b8a6;
+  --hc-teal-dark: #0f766e;
+  --hc-teal-darker: #134e4a;
+
+  // Success Colors (Teal-based)
+  --hc-success-50: #f0fdfa;
+  --hc-success-100: #ccfbf1;
+  --hc-success-200: #99f6e4;
+  --hc-success-300: #5eead4;
+  --hc-success-400: #2dd4bf;
+  --hc-success-500: #14b8a6;
+  --hc-success-600: #0d9488;
+  --hc-success-700: #0f766e;
+  --hc-success-800: #115e59;
+  --hc-success-900: #134e4a;
+
+  // Warning Colors (Warm teal complement)
+  --hc-warning-50: #fefce8;
+  --hc-warning-100: #fef9c3;
+  --hc-warning-200: #fef08a;
+  --hc-warning-300: #fde047;
+  --hc-warning-400: #facc15;
+  --hc-warning-500: #eab308;
+  --hc-warning-600: #ca8a04;
+  --hc-warning-700: #a16207;
+  --hc-warning-800: #854d0e;
+  --hc-warning-900: #713f12;
+
+  // Error Colors (Coral complement to teal)
+  --hc-error-50: #fef2f2;
+  --hc-error-100: #fee2e2;
+  --hc-error-200: #fecaca;
+  --hc-error-300: #fca5a5;
+  --hc-error-400: #f87171;
+  --hc-error-500: #ef4444;
+  --hc-error-600: #dc2626;
+  --hc-error-700: #b91c1c;
+  --hc-error-800: #991b1b;
+  --hc-error-900: #7f1d1d;
+
+  // Neutral/Gray Scale (Teal-influenced)
+  --hc-gray-50: #f8fafc;
+  --hc-gray-100: #f1f5f9;
+  --hc-gray-200: #e2e8f0;
+  --hc-gray-300: #cbd5e1;
+  --hc-gray-400: #94a3b8;
+  --hc-gray-500: #64748b;
+  --hc-gray-600: #475569;
+  --hc-gray-700: #334155;
+  --hc-gray-800: #1e293b;
+  --hc-gray-900: #0f172a;
+
+  // White and Pure Colors
+  --hc-white: #ffffff;
+  --hc-white-soft: #fefefe;
+  --hc-white-warm: #fafafa;
+
+  // Medical Specialty Colors (Teal-based variations)
+  --hc-cardiology: #0d9488;
+  --hc-neurology: #0f766e;
+  --hc-pediatrics: #2dd4bf;
+  --hc-orthopedics: #14b8a6;
+  --hc-dermatology: #5eead4;
+  --hc-psychiatry: #115e59;
+
+  // ===== TYPOGRAPHY =====
+  --hc-font-family-primary: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --hc-font-family-heading: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --hc-font-family-mono: 'JetBrains Mono', 'Fira Code', Consolas, monospace;
+
+  // Font Sizes
+  --hc-text-xs: 0.75rem;    // 12px
+  --hc-text-sm: 0.875rem;   // 14px
+  --hc-text-base: 1rem;     // 16px
+  --hc-text-lg: 1.125rem;   // 18px
+  --hc-text-xl: 1.25rem;    // 20px
+  --hc-text-2xl: 1.5rem;    // 24px
+  --hc-text-3xl: 1.875rem;  // 30px
+  --hc-text-4xl: 2.25rem;   // 36px
+  --hc-text-5xl: 3rem;      // 48px
+
+  // Font Weights
+  --hc-font-light: 300;
+  --hc-font-normal: 400;
+  --hc-font-medium: 500;
+  --hc-font-semibold: 600;
+  --hc-font-bold: 700;
+  --hc-font-extrabold: 800;
+
+  // Line Heights
+  --hc-leading-tight: 1.25;
+  --hc-leading-normal: 1.5;
+  --hc-leading-relaxed: 1.625;
+
+  // ===== SPACING =====
+  --hc-space-1: 0.25rem;   // 4px
+  --hc-space-2: 0.5rem;    // 8px
+  --hc-space-3: 0.75rem;   // 12px
+  --hc-space-4: 1rem;      // 16px
+  --hc-space-5: 1.25rem;   // 20px
+  --hc-space-6: 1.5rem;    // 24px
+  --hc-space-8: 2rem;      // 32px
+  --hc-space-10: 2.5rem;   // 40px
+  --hc-space-12: 3rem;     // 48px
+  --hc-space-16: 4rem;     // 64px
+  --hc-space-20: 5rem;     // 80px
+  --hc-space-24: 6rem;     // 96px
+
+  // ===== SHADOWS =====
+  --hc-shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --hc-shadow-base: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+  --hc-shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  --hc-shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  --hc-shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  --hc-shadow-2xl: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+
+  // ===== BORDER RADIUS =====
+  --hc-radius-sm: 0.25rem;   // 4px
+  --hc-radius-base: 0.375rem; // 6px
+  --hc-radius-md: 0.5rem;    // 8px
+  --hc-radius-lg: 0.75rem;   // 12px
+  --hc-radius-xl: 1rem;      // 16px
+  --hc-radius-2xl: 1.5rem;   // 24px
+  --hc-radius-full: 9999px;
+
+  // ===== TRANSITIONS =====
+  --hc-transition-fast: 150ms ease-in-out;
+  --hc-transition-base: 250ms ease-in-out;
+  --hc-transition-slow: 350ms ease-in-out;
+
+  // ===== Z-INDEX =====
+  --hc-z-dropdown: 1000;
+  --hc-z-sticky: 1020;
+  --hc-z-fixed: 1030;
+  --hc-z-modal-backdrop: 1040;
+  --hc-z-modal: 1050;
+  --hc-z-popover: 1060;
+  --hc-z-tooltip: 1070;
+  --hc-z-toast: 1080;
+}
+
+// ===== GLOBAL STYLES =====
+* {
+  box-sizing: border-box;
+}
+
+html {
+  font-size: 16px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  font-family: var(--hc-font-family-primary);
+  font-weight: var(--hc-font-normal);
+  color: var(--hc-gray-800);
+  background-color: var(--hc-white);
+  margin: 0;
+  padding: 0;
+}
+
+// ===== UTILITY CLASSES =====
+.hc-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 var(--hc-space-4);
+}
+
+.hc-card {
+  background: white;
+  border-radius: var(--hc-radius-lg);
+  box-shadow: var(--hc-shadow-base);
+  border: 1px solid var(--hc-gray-200);
+  overflow: hidden;
+}
+
+.hc-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--hc-space-2);
+  padding: var(--hc-space-3) var(--hc-space-6);
+  border-radius: var(--hc-radius-md);
+  font-weight: var(--hc-font-medium);
+  font-size: var(--hc-text-sm);
+  line-height: 1;
+  text-decoration: none;
+  border: none;
+  cursor: pointer;
+  transition: all var(--hc-transition-fast);
+  
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+
+.hc-btn-primary {
+  background-color: var(--hc-primary-600);
+  color: var(--hc-white);
+
+  &:hover:not(:disabled) {
+    background-color: var(--hc-primary-700);
+    transform: translateY(-1px);
+    box-shadow: var(--hc-shadow-md);
+  }
+}
+
+.hc-btn-secondary {
+  background-color: var(--hc-white);
+  color: var(--hc-primary-700);
+  border: 1px solid var(--hc-primary-300);
+
+  &:hover:not(:disabled) {
+    background-color: var(--hc-primary-50);
+    border-color: var(--hc-primary-400);
+    color: var(--hc-primary-800);
+  }
+}
+
+.hc-input {
+  width: 100%;
+  padding: var(--hc-space-3) var(--hc-space-4);
+  border: 1px solid var(--hc-gray-300);
+  border-radius: var(--hc-radius-md);
+  font-size: var(--hc-text-base);
+  transition: all var(--hc-transition-fast);
+  
+  &:focus {
+    outline: none;
+    border-color: var(--hc-primary-500);
+    box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.1);
+  }
+}
+
+// ===== MEDICAL SPECIFIC STYLES =====
+.hc-medical-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--hc-space-1);
+  padding: var(--hc-space-1) var(--hc-space-3);
+  border-radius: var(--hc-radius-full);
+  font-size: var(--hc-text-xs);
+  font-weight: var(--hc-font-medium);
+  
+  &.urgent {
+    background-color: var(--hc-error-100);
+    color: var(--hc-error-800);
+  }
+  
+  &.normal {
+    background-color: var(--hc-success-100);
+    color: var(--hc-success-800);
+  }
+  
+  &.scheduled {
+    background-color: var(--hc-primary-100);
+    color: var(--hc-primary-800);
+  }
+}
+
+.hc-status-indicator {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  
+  &.online {
+    background-color: var(--hc-success-500);
+    box-shadow: 0 0 0 2px var(--hc-success-100);
+  }
+  
+  &.busy {
+    background-color: var(--hc-error-500);
+    box-shadow: 0 0 0 2px var(--hc-error-100);
+  }
+  
+  &.away {
+    background-color: var(--hc-warning-500);
+    box-shadow: 0 0 0 2px var(--hc-warning-100);
+  }
+}

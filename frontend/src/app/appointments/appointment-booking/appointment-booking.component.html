@@ -1,0 +1,187 @@
+<div class="container-fluid py-4">
+  <div class="row justify-content-center">
+    <div class="col-lg-8">
+      <div class="card">
+        <div class="card-header">
+          <h4 class="card-title mb-0">
+            <i class="fas fa-calendar-plus me-2"></i>Book an Appointment
+          </h4>
+        </div>
+        <div class="card-body">
+          <!-- Success Message -->
+          <div *ngIf="success" class="alert alert-success" role="alert">
+            <i class="fas fa-check-circle me-2"></i>
+            {{ success }}
+          </div>
+
+          <!-- Error Message -->
+          <div *ngIf="error" class="alert alert-danger" role="alert">
+            <i class="fas fa-exclamation-triangle me-2"></i>
+            {{ error }}
+          </div>
+
+          <form *ngIf="bookingForm" [formGroup]="bookingForm" (ngSubmit)="onSubmit()">
+            <!-- Doctor Selection -->
+            <div class="mb-4">
+              <label for="doctorId" class="form-label">Select Doctor *</label>
+              <select 
+                id="doctorId" 
+                class="form-select"
+                formControlName="doctorId"
+                [class.is-invalid]="bookingForm.get('doctorId')?.invalid && bookingForm.get('doctorId')?.touched">
+                <option value="">Choose a doctor...</option>
+                <option *ngFor="let doctor of doctors" [value]="doctor.id">
+                  {{ doctor.fullName }} - {{ doctor.specialization || 'General Practice' }}
+                </option>
+              </select>
+              <div class="invalid-feedback" *ngIf="bookingForm.get('doctorId')?.invalid && bookingForm.get('doctorId')?.touched">
+                Please select a doctor.
+              </div>
+            </div>
+
+            <!-- Selected Doctor Info -->
+            <div *ngIf="selectedDoctor" class="card bg-light mb-4">
+              <div class="card-body">
+                <div class="d-flex align-items-center">
+                  <div class="avatar-circle me-3">
+                    <i class="fas fa-user-md"></i>
+                  </div>
+                  <div>
+                    <h6 class="mb-1">{{ selectedDoctor.fullName }}</h6>
+                    <p class="text-muted mb-1">{{ selectedDoctor.specialization || 'General Practice' }}</p>
+                    <p class="text-muted mb-0" *ngIf="selectedDoctor.affiliation">
+                      {{ selectedDoctor.affiliation }}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="row">
+              <!-- Date Selection -->
+              <div class="col-md-6 mb-3">
+                <label for="date" class="form-label">Appointment Date *</label>
+                <input 
+                  type="date" 
+                  id="date"
+                  class="form-control"
+                  formControlName="date"
+                  [min]="getTodayDate()"
+                  [class.is-invalid]="bookingForm.get('date')?.invalid && bookingForm.get('date')?.touched">
+                <div class="invalid-feedback" *ngIf="bookingForm.get('date')?.invalid && bookingForm.get('date')?.touched">
+                  Please select a date.
+                </div>
+              </div>
+
+              <!-- Appointment Type -->
+              <div class="col-md-6 mb-3">
+                <label for="type" class="form-label">Appointment Type *</label>
+                <select 
+                  id="type" 
+                  class="form-select"
+                  formControlName="type"
+                  [class.is-invalid]="bookingForm.get('type')?.invalid && bookingForm.get('type')?.touched">
+                  <option *ngFor="let type of appointmentTypes" [value]="type.value">
+                    {{ type.label }}
+                  </option>
+                </select>
+                <div class="invalid-feedback" *ngIf="bookingForm.get('type')?.invalid && bookingForm.get('type')?.touched">
+                  Please select an appointment type.
+                </div>
+              </div>
+            </div>
+
+            <!-- Time Slot Selection -->
+            <div class="mb-3">
+              <label for="timeSlot" class="form-label">Available Time Slots *</label>
+              
+              <!-- Loading Time Slots -->
+              <div *ngIf="loading" class="text-center py-3">
+                <div class="spinner-border spinner-border-sm text-primary me-2" role="status">
+                  <span class="visually-hidden">Loading...</span>
+                </div>
+                Loading available time slots...
+              </div>
+
+              <!-- Time Slots Grid -->
+              <div *ngIf="!loading && availableSlots.length > 0" class="time-slots-grid">
+                <div class="row">
+                  <div class="col-md-4 col-sm-6 mb-2" *ngFor="let slot of availableSlots">
+                    <label class="time-slot-option">
+                      <input 
+                        type="radio" 
+                        name="timeSlot"
+                        [value]="getTimeSlotValue(slot)"
+                        formControlName="timeSlot">
+                      <span class="time-slot-label">
+                        {{ getTimeSlotDisplay(slot) }}
+                      </span>
+                    </label>
+                  </div>
+                </div>
+              </div>
+
+              <!-- No Time Slots Available -->
+              <div *ngIf="!loading && selectedDoctor && availableSlots.length === 0" class="alert alert-info">
+                <i class="fas fa-info-circle me-2"></i>
+                No available time slots for the selected date. Please choose a different date.
+              </div>
+
+              <div class="invalid-feedback" 
+                   [style.display]="bookingForm.get('timeSlot')?.invalid && bookingForm.get('timeSlot')?.touched ? 'block' : 'none'">
+                Please select a time slot.
+              </div>
+            </div>
+
+            <!-- Reason for Visit -->
+            <div class="mb-3">
+              <label for="reasonForVisit" class="form-label">Reason for Visit *</label>
+              <input 
+                type="text" 
+                id="reasonForVisit"
+                class="form-control"
+                formControlName="reasonForVisit"
+                placeholder="e.g., Regular checkup, Follow-up, Consultation"
+                [class.is-invalid]="bookingForm.get('reasonForVisit')?.invalid && bookingForm.get('reasonForVisit')?.touched">
+              <div class="invalid-feedback" *ngIf="bookingForm.get('reasonForVisit')?.invalid && bookingForm.get('reasonForVisit')?.touched">
+                Please provide a reason for the visit.
+              </div>
+            </div>
+
+            <!-- Additional Notes -->
+            <div class="mb-4">
+              <label for="notes" class="form-label">Additional Notes (Optional)</label>
+              <textarea 
+                id="notes"
+                class="form-control"
+                formControlName="notes"
+                rows="3"
+                placeholder="Any additional information or special requests..."></textarea>
+            </div>
+
+            <!-- Submit Button -->
+            <div class="d-flex justify-content-between">
+              <button 
+                type="button" 
+                class="btn btn-outline-secondary"
+                routerLink="/appointments/doctors">
+                <i class="fas fa-arrow-left me-2"></i>
+                Back to Doctors
+              </button>
+              <button 
+                type="submit" 
+                class="btn btn-primary"
+                [disabled]="bookingForm.invalid || submitting">
+                <span *ngIf="submitting" class="spinner-border spinner-border-sm me-2" role="status">
+                  <span class="visually-hidden">Loading...</span>
+                </span>
+                <i *ngIf="!submitting" class="fas fa-calendar-check me-2"></i>
+                {{ submitting ? 'Booking...' : 'Book Appointment' }}
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

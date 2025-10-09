@@ -1,0 +1,244 @@
+<div class="ai-chat-container">
+  <!-- Modern Header -->
+  <div class="chat-header">
+    <div class="header-content">
+      <div class="header-left">
+        <div class="ai-avatar">
+          <div class="avatar-glow">
+            <i class="fas fa-brain"></i>
+          </div>
+        </div>
+        <div class="header-text">
+          <h3 class="assistant-title">HealthConnect AI</h3>
+          <p class="assistant-subtitle">Your Personal Health Assistant</p>
+        </div>
+      </div>
+
+      <div class="header-actions">
+        <button
+          class="action-btn new-chat-btn"
+          (click)="onNewConversation()"
+          [disabled]="isSending"
+          title="Start New Conversation">
+          <i class="fas fa-plus"></i>
+          <span>New Chat</span>
+        </button>
+        <button
+          class="action-btn history-btn"
+          routerLink="/ai-health-bot/history"
+          title="View Chat History">
+          <i class="fas fa-history"></i>
+          <span>History</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Conversation Status -->
+    <div class="conversation-status" *ngIf="currentConversation">
+      <div class="status-indicator">
+        <div class="status-dot"></div>
+        <span class="status-text">
+          <i class="fas fa-{{getConversationTypeIcon(currentConversation.conversationType)}} me-2"></i>
+          {{getConversationTypeDisplayName(currentConversation.conversationType)}}
+        </span>
+        <span class="conversation-title">{{currentConversation.title}}</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Messages Container -->
+  <div class="messages-container" #messagesContainer>
+    <!-- Loading State -->
+    <div class="loading-state" *ngIf="isLoading">
+      <div class="loading-animation">
+        <div class="loading-dots">
+          <div class="dot"></div>
+          <div class="dot"></div>
+          <div class="dot"></div>
+        </div>
+        <p class="loading-text">Initializing AI Assistant...</p>
+      </div>
+    </div>
+
+    <!-- Welcome Message -->
+    <div class="welcome-section" *ngIf="messages.length === 0 && !isLoading">
+      <div class="welcome-content">
+        <div class="welcome-icon">
+          <div class="icon-wrapper">
+            <i class="fas fa-stethoscope"></i>
+          </div>
+        </div>
+        <h4 class="welcome-title">Welcome to Your AI Health Assistant</h4>
+        <p class="welcome-description">
+          I'm here to provide personalized health guidance, answer your medical questions,
+          and help you understand your symptoms better.
+        </p>
+
+        <div class="disclaimer-card">
+          <div class="disclaimer-icon">
+            <i class="fas fa-shield-alt"></i>
+          </div>
+          <div class="disclaimer-content">
+            <h6>Medical Disclaimer</h6>
+            <p>This AI provides general health information only. For emergencies or serious medical concerns, please consult healthcare professionals immediately.</p>
+          </div>
+        </div>
+
+        <div class="quick-actions">
+          <h6>Quick Start:</h6>
+          <div class="action-chips">
+            <button class="chip" (click)="sendQuickMessage('I have a headache')">
+              <i class="fas fa-head-side-cough"></i>
+              Symptom Check
+            </button>
+            <button class="chip" (click)="sendQuickMessage('What should I eat for better health?')">
+              <i class="fas fa-apple-alt"></i>
+              Nutrition Advice
+            </button>
+            <button class="chip" (click)="sendQuickMessage('I need help with my medication')">
+              <i class="fas fa-pills"></i>
+              Medication Help
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Messages -->
+    <div class="messages-list" *ngIf="messages.length > 0">
+      <div
+        class="message-wrapper"
+        *ngFor="let message of messages"
+        [ngClass]="{'user-message': message.role === 'USER', 'ai-message': message.role === 'ASSISTANT'}">
+
+        <div class="message-bubble">
+          <div class="message-avatar" *ngIf="message.role === 'ASSISTANT'">
+            <div class="ai-avatar-small">
+              <i class="fas fa-brain"></i>
+            </div>
+          </div>
+
+          <div class="message-content">
+            <div class="message-header" *ngIf="message.role === 'ASSISTANT'">
+              <span class="sender-name">HealthConnect AI</span>
+              <span class="message-timestamp">{{formatTimestamp(message.timestamp)}}</span>
+            </div>
+
+            <div class="message-body">
+              <p class="message-text">{{message.content}}</p>
+            </div>
+
+            <div class="message-footer" *ngIf="message.role === 'USER'">
+              <span class="message-timestamp">{{formatTimestamp(message.timestamp)}}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Typing Indicator -->
+      <div class="message-wrapper ai-message typing-message" *ngIf="isSending">
+        <div class="message-bubble">
+          <div class="message-avatar">
+            <div class="ai-avatar-small typing">
+              <i class="fas fa-brain"></i>
+            </div>
+          </div>
+
+          <div class="message-content">
+            <div class="message-header">
+              <span class="sender-name">HealthConnect AI</span>
+              <span class="typing-status">is thinking...</span>
+            </div>
+
+            <div class="message-body">
+              <div class="modern-typing-indicator">
+                <div class="typing-dot"></div>
+                <div class="typing-dot"></div>
+                <div class="typing-dot"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Error Message -->
+  <div class="error-notification" *ngIf="error">
+    <div class="error-content">
+      <div class="error-icon">
+        <i class="fas fa-exclamation-circle"></i>
+      </div>
+      <div class="error-text">
+        <h6>Something went wrong</h6>
+        <p>{{error}}</p>
+      </div>
+      <button class="error-close" (click)="clearError()">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+  </div>
+
+  <!-- Modern Chat Input -->
+  <div class="chat-input-section">
+    <form [formGroup]="chatForm" (ngSubmit)="onSendMessage()">
+      <!-- Conversation Type Selector -->
+      <div class="conversation-selector" *ngIf="!currentConversation">
+        <div class="selector-wrapper">
+          <label class="selector-label">
+            <i class="fas fa-tag"></i>
+            Conversation Type
+          </label>
+          <select
+            class="modern-select"
+            formControlName="conversationType"
+            (change)="onConversationTypeChange()">
+            <option *ngFor="let type of conversationTypes" [value]="type">
+              {{getConversationTypeDisplayName(type)}}
+            </option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Message Input Container -->
+      <div class="input-container">
+        <div class="input-wrapper">
+          <textarea
+            class="message-input"
+            formControlName="message"
+            placeholder="Ask me anything about your health..."
+            rows="1"
+            [disabled]="isSending"
+            (keypress)="onKeyPress($event)"
+            (input)="autoResize($event)"></textarea>
+
+          <div class="input-actions">
+            <button
+              class="send-button"
+              type="submit"
+              [disabled]="chatForm.invalid || isSending"
+              [class.sending]="isSending">
+              <div class="button-content">
+                <i class="fas fa-paper-plane" *ngIf="!isSending"></i>
+                <div class="sending-spinner" *ngIf="isSending">
+                  <div class="spinner-dot"></div>
+                  <div class="spinner-dot"></div>
+                  <div class="spinner-dot"></div>
+                </div>
+              </div>
+            </button>
+          </div>
+        </div>
+
+        <!-- Character Counter -->
+        <div class="input-footer">
+          <div class="character-count">
+            <span class="count" [class.warning]="(chatForm.get('message')?.value?.length || 0) > 1800">
+              {{chatForm.get('message')?.value?.length || 0}}/2000
+            </span>
+          </div>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>

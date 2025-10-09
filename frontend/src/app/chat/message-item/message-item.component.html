@@ -1,0 +1,13 @@
+<div class="message-item" [class.own-message]="isOwn" [class.other-message]="!isOwn">
+  <div class="message-content">
+    <div class="message-bubble">
+      <p class="message-text mb-1">{{ message.content }}</p>
+      <div class="message-meta">
+        <small class="message-time">{{ formatTime(message.createdAt) }}</small>
+        <span *ngIf="isOwn" class="message-status ms-1" [class]="getStatusClass()">
+          <i class="bi" [class]="getStatusIcon()"></i>
+        </span>
+      </div>
+    </div>
+  </div>
+</div>

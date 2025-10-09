@@ -1,0 +1,537 @@
+.video-call-container {
+  position: relative;
+  width: 100%;
+  height: 100vh;
+  background: #000;
+  overflow: hidden;
+  font-family: 'Roboto', sans-serif;
+}
+
+.video-main-area {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+.remote-video-container {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #1a1a1a;
+}
+
+.remote-video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  
+  &.hidden {
+    display: none;
+  }
+}
+
+.no-remote-participant {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  text-align: center;
+  
+  .participant-avatar {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    background: #333;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 20px;
+    
+    i {
+      font-size: 60px;
+      color: #666;
+    }
+  }
+  
+  p {
+    font-size: 18px;
+    color: #ccc;
+    margin: 0;
+  }
+}
+
+.local-video-container {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  width: 240px;
+  height: 180px;
+  border-radius: 12px;
+  overflow: hidden;
+  background: #333;
+  border: 2px solid #fff;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  z-index: 10;
+}
+
+.local-video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  
+  &.video-muted {
+    display: none;
+  }
+}
+
+.video-muted-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: #333;
+  color: #fff;
+  
+  .user-avatar {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: #555;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 8px;
+    
+    i {
+      font-size: 30px;
+    }
+  }
+  
+  p {
+    font-size: 12px;
+    margin: 0;
+  }
+}
+
+.audio-muted-indicator {
+  position: absolute;
+  bottom: 8px;
+  left: 8px;
+  background: rgba(220, 53, 69, 0.9);
+  color: #fff;
+  padding: 4px 6px;
+  border-radius: 4px;
+  font-size: 12px;
+  
+  i {
+    font-size: 14px;
+  }
+}
+
+.connection-quality {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  background: rgba(0, 0, 0, 0.7);
+  color: #fff;
+  padding: 8px 12px;
+  border-radius: 20px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 14px;
+  
+  &.success {
+    background: rgba(40, 167, 69, 0.9);
+  }
+  
+  &.warning {
+    background: rgba(255, 193, 7, 0.9);
+  }
+  
+  &.danger {
+    background: rgba(220, 53, 69, 0.9);
+  }
+  
+  i {
+    font-size: 16px;
+  }
+}
+
+.call-duration {
+  position: absolute;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0, 0, 0, 0.7);
+  color: #fff;
+  padding: 8px 12px;
+  border-radius: 20px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  
+  i {
+    font-size: 16px;
+  }
+}
+
+.recording-indicator {
+  position: absolute;
+  top: 70px;
+  left: 20px;
+  background: rgba(220, 53, 69, 0.9);
+  color: #fff;
+  padding: 8px 12px;
+  border-radius: 20px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 14px;
+  
+  .recording-pulse {
+    animation: pulse 1.5s infinite;
+  }
+}
+
+@keyframes pulse {
+  0% { opacity: 1; }
+  50% { opacity: 0.5; }
+  100% { opacity: 1; }
+}
+
+.call-controls {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: linear-gradient(transparent, rgba(0, 0, 0, 0.8));
+  padding: 40px 20px 20px;
+  transition: opacity 0.3s ease;
+  
+  &.hidden {
+    opacity: 0;
+    pointer-events: none;
+  }
+}
+
+.controls-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.controls-left,
+.controls-right {
+  display: flex;
+  gap: 12px;
+}
+
+.controls-center {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+}
+
+.call-status {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  color: #fff;
+  
+  .status-text {
+    font-size: 14px;
+    margin-bottom: 4px;
+  }
+  
+  .participant-count {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 12px;
+    color: #ccc;
+    
+    i {
+      font-size: 14px;
+    }
+  }
+}
+
+.btn-round {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  cursor: pointer;
+  
+  i {
+    font-size: 20px;
+  }
+  
+  &:hover {
+    transform: scale(1.1);
+  }
+  
+  &.btn-secondary {
+    background: rgba(108, 117, 125, 0.8);
+    color: #fff;
+    
+    &:hover {
+      background: rgba(108, 117, 125, 1);
+    }
+  }
+  
+  &.btn-danger {
+    background: rgba(220, 53, 69, 0.9);
+    color: #fff;
+    
+    &:hover {
+      background: rgba(220, 53, 69, 1);
+    }
+  }
+  
+  &.btn-primary {
+    background: rgba(0, 123, 255, 0.9);
+    color: #fff;
+    
+    &:hover {
+      background: rgba(0, 123, 255, 1);
+    }
+  }
+}
+
+.participants-panel,
+.settings-panel {
+  position: absolute;
+  top: 0;
+  right: -350px;
+  width: 350px;
+  height: 100%;
+  background: rgba(33, 37, 41, 0.95);
+  backdrop-filter: blur(10px);
+  color: #fff;
+  transition: right 0.3s ease;
+  z-index: 20;
+  
+  &.show {
+    right: 0;
+  }
+}
+
+.panel-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  
+  h5 {
+    margin: 0;
+    font-size: 18px;
+  }
+  
+  button {
+    background: none;
+    border: none;
+    color: #fff;
+    cursor: pointer;
+    padding: 4px;
+    border-radius: 4px;
+    
+    &:hover {
+      background: rgba(255, 255, 255, 0.1);
+    }
+  }
+}
+
+.participants-list {
+  padding: 20px;
+}
+
+.participant-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  
+  &.current-user {
+    background: rgba(0, 123, 255, 0.1);
+    padding: 12px;
+    border-radius: 8px;
+    margin-bottom: 12px;
+  }
+  
+  .participant-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: #555;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    
+    i {
+      font-size: 20px;
+    }
+  }
+  
+  .participant-info {
+    flex: 1;
+    
+    .participant-name {
+      display: block;
+      font-weight: 500;
+      margin-bottom: 2px;
+    }
+    
+    .participant-role {
+      font-size: 12px;
+      color: #ccc;
+    }
+  }
+  
+  .participant-status {
+    display: flex;
+    gap: 4px;
+    
+    i {
+      font-size: 16px;
+      color: #dc3545;
+    }
+  }
+}
+
+.settings-content {
+  padding: 20px;
+}
+
+.setting-group {
+  margin-bottom: 24px;
+  
+  h6 {
+    margin-bottom: 12px;
+    font-size: 14px;
+    color: #ccc;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  
+  .form-check {
+    margin-bottom: 8px;
+    
+    .form-check-input {
+      margin-right: 8px;
+    }
+    
+    .form-check-label {
+      font-size: 14px;
+    }
+  }
+  
+  .form-group {
+    margin-bottom: 12px;
+    
+    label {
+      display: block;
+      margin-bottom: 4px;
+      font-size: 14px;
+      color: #ccc;
+    }
+    
+    .form-control {
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      color: #fff;
+      border-radius: 4px;
+      padding: 8px 12px;
+      
+      &:focus {
+        background: rgba(255, 255, 255, 0.15);
+        border-color: #007bff;
+        outline: none;
+      }
+    }
+  }
+}
+
+.loading-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 30;
+}
+
+.loading-content {
+  text-align: center;
+  color: #fff;
+  
+  .spinner-border {
+    width: 3rem;
+    height: 3rem;
+    margin-bottom: 20px;
+  }
+  
+  p {
+    font-size: 18px;
+    margin: 0;
+  }
+}
+
+// Responsive design
+@media (max-width: 768px) {
+  .local-video-container {
+    width: 120px;
+    height: 90px;
+    top: 10px;
+    right: 10px;
+  }
+  
+  .controls-container {
+    flex-direction: column;
+    gap: 16px;
+  }
+  
+  .controls-left,
+  .controls-right {
+    justify-content: center;
+  }
+  
+  .participants-panel,
+  .settings-panel {
+    width: 100%;
+    right: -100%;
+  }
+  
+  .btn-round {
+    width: 45px;
+    height: 45px;
+    
+    i {
+      font-size: 18px;
+    }
+  }
+}

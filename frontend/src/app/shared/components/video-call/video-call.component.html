@@ -1,0 +1,267 @@
+<div class="video-call-container" (mousemove)="onMouseMove()">
+  <!-- Main video area -->
+  <div class="video-main-area">
+    <!-- Remote video (main view) -->
+    <div class="remote-video-container">
+      <video 
+        #remoteVideo 
+        class="remote-video" 
+        autoplay 
+        playsinline
+        [class.hidden]="remoteStreams.size === 0">
+      </video>
+      
+      <!-- No remote participant placeholder -->
+      <div class="no-remote-participant" *ngIf="remoteStreams.size === 0">
+        <div class="participant-avatar">
+          <i class="material-icons">person</i>
+        </div>
+        <p>Waiting for other participant...</p>
+      </div>
+      
+      <!-- Connection quality indicator -->
+      <div class="connection-quality" [class]="connectionQualityColor">
+        <i class="material-icons">{{ connectionQualityIcon }}</i>
+        <span>{{ callState.connectionQuality }}</span>
+      </div>
+      
+      <!-- Call duration -->
+      <div class="call-duration">
+        <i class="material-icons">schedule</i>
+        <span>{{ formatCallDuration(callState.callDuration) }}</span>
+      </div>
+      
+      <!-- Recording indicator -->
+      <div class="recording-indicator" *ngIf="recording.isRecording">
+        <i class="material-icons recording-pulse">fiber_manual_record</i>
+        <span>Recording</span>
+      </div>
+    </div>
+    
+    <!-- Local video (picture-in-picture) -->
+    <div class="local-video-container">
+      <video 
+        #localVideo 
+        class="local-video" 
+        autoplay 
+        playsinline 
+        muted
+        [class.video-muted]="callState.isVideoMuted">
+      </video>
+      
+      <!-- Local video muted overlay -->
+      <div class="video-muted-overlay" *ngIf="callState.isVideoMuted">
+        <div class="user-avatar">
+          <i class="material-icons">person</i>
+        </div>
+        <p>{{ currentUser?.firstName || 'You' }}</p>
+      </div>
+      
+      <!-- Audio muted indicator -->
+      <div class="audio-muted-indicator" *ngIf="callState.isAudioMuted">
+        <i class="material-icons">mic_off</i>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Call controls -->
+  <div class="call-controls" [class.hidden]="!showControls">
+    <div class="controls-container">
+      <!-- Left controls -->
+      <div class="controls-left">
+        <button 
+          class="btn btn-round" 
+          [class]="getAudioButtonClass()"
+          (click)="toggleAudio()"
+          [title]="callState.isAudioMuted ? 'Unmute' : 'Mute'">
+          <i class="material-icons">{{ getAudioIcon() }}</i>
+        </button>
+        
+        <button 
+          class="btn btn-round" 
+          [class]="getVideoButtonClass()"
+          (click)="toggleVideo()"
+          [title]="callState.isVideoMuted ? 'Turn on camera' : 'Turn off camera'">
+          <i class="material-icons">{{ getVideoIcon() }}</i>
+        </button>
+        
+        <button 
+          class="btn btn-round" 
+          [class]="getScreenShareButtonClass()"
+          (click)="toggleScreenShare()"
+          [title]="callState.isScreenSharing ? 'Stop sharing' : 'Share screen'">
+          <i class="material-icons">{{ getScreenShareIcon() }}</i>
+        </button>
+      </div>
+      
+      <!-- Center controls -->
+      <div class="controls-center">
+        <!-- Call status -->
+        <div class="call-status">
+          <span class="status-text">{{ getCallStatusText() }}</span>
+          <span class="participant-count">
+            <i class="material-icons">people</i>
+            {{ getParticipantCount() }}
+          </span>
+        </div>
+      </div>
+      
+      <!-- Right controls -->
+      <div class="controls-right">
+        <!-- Recording button (only for doctors) -->
+        <button 
+          *ngIf="isDoctor"
+          class="btn btn-round" 
+          [class]="getRecordingButtonClass()"
+          (click)="toggleRecording()"
+          [title]="recording.isRecording ? 'Stop recording' : 'Start recording'">
+          <i class="material-icons">{{ getRecordingIcon() }}</i>
+        </button>
+        
+        <!-- Participants button -->
+        <button 
+          class="btn btn-round btn-secondary"
+          (click)="toggleParticipants()"
+          title="Participants">
+          <i class="material-icons">people</i>
+        </button>
+        
+        <!-- Settings button -->
+        <button 
+          class="btn btn-round btn-secondary"
+          (click)="toggleSettings()"
+          title="Settings">
+          <i class="material-icons">settings</i>
+        </button>
+        
+        <!-- Fullscreen button -->
+        <button 
+          class="btn btn-round btn-secondary"
+          (click)="toggleFullscreen()"
+          [title]="isFullscreen ? 'Exit fullscreen' : 'Fullscreen'">
+          <i class="material-icons">{{ isFullscreen ? 'fullscreen_exit' : 'fullscreen' }}</i>
+        </button>
+        
+        <!-- End call button -->
+        <button 
+          class="btn btn-round btn-danger"
+          (click)="endCall()"
+          title="End call">
+          <i class="material-icons">call_end</i>
+        </button>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Participants panel -->
+  <div class="participants-panel" [class.show]="showParticipants">
+    <div class="panel-header">
+      <h5>Participants ({{ getParticipantCount() }})</h5>
+      <button class="btn btn-sm btn-secondary" (click)="toggleParticipants()">
+        <i class="material-icons">close</i>
+      </button>
+    </div>
+    
+    <div class="participants-list">
+      <!-- Current user -->
+      <div class="participant-item current-user">
+        <div class="participant-avatar">
+          <i class="material-icons">person</i>
+        </div>
+        <div class="participant-info">
+          <span class="participant-name">{{ currentUser?.firstName }} {{ currentUser?.lastName }} (You)</span>
+          <span class="participant-role">{{ currentUser?.role }}</span>
+        </div>
+        <div class="participant-status">
+          <i class="material-icons" *ngIf="callState.isAudioMuted">mic_off</i>
+          <i class="material-icons" *ngIf="callState.isVideoMuted">videocam_off</i>
+        </div>
+      </div>
+      
+      <!-- Other participants -->
+      <div class="participant-item" *ngFor="let participant of callState.participants">
+        <div class="participant-avatar">
+          <i class="material-icons">person</i>
+        </div>
+        <div class="participant-info">
+          <span class="participant-name">{{ participant.name }}</span>
+          <span class="participant-role">{{ participant.role }}</span>
+        </div>
+        <div class="participant-status">
+          <i class="material-icons" *ngIf="participant.isAudioMuted">mic_off</i>
+          <i class="material-icons" *ngIf="participant.isVideoMuted">videocam_off</i>
+          <i class="material-icons" *ngIf="participant.isScreenSharing">screen_share</i>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Settings panel -->
+  <div class="settings-panel" [class.show]="showSettings">
+    <div class="panel-header">
+      <h5>Settings</h5>
+      <button class="btn btn-sm btn-secondary" (click)="toggleSettings()">
+        <i class="material-icons">close</i>
+      </button>
+    </div>
+    
+    <div class="settings-content">
+      <!-- Audio settings -->
+      <div class="setting-group">
+        <h6>Audio</h6>
+        <div class="form-check">
+          <input class="form-check-input" type="checkbox" id="echoCancellation" checked>
+          <label class="form-check-label" for="echoCancellation">
+            Echo Cancellation
+          </label>
+        </div>
+        <div class="form-check">
+          <input class="form-check-input" type="checkbox" id="noiseSuppression" checked>
+          <label class="form-check-label" for="noiseSuppression">
+            Noise Suppression
+          </label>
+        </div>
+      </div>
+      
+      <!-- Video settings -->
+      <div class="setting-group">
+        <h6>Video</h6>
+        <div class="form-group">
+          <label for="videoQuality">Quality</label>
+          <select class="form-control" id="videoQuality">
+            <option value="720p">720p HD</option>
+            <option value="480p">480p</option>
+            <option value="360p">360p</option>
+          </select>
+        </div>
+      </div>
+      
+      <!-- Recording settings (only for doctors) -->
+      <div class="setting-group" *ngIf="isDoctor">
+        <h6>Recording</h6>
+        <div class="form-check">
+          <input class="form-check-input" type="checkbox" id="autoRecord">
+          <label class="form-check-label" for="autoRecord">
+            Auto-start recording
+          </label>
+        </div>
+        <div class="form-check">
+          <input class="form-check-input" type="checkbox" id="recordAudio" checked>
+          <label class="form-check-label" for="recordAudio">
+            Record audio
+          </label>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Loading overlay -->
+  <div class="loading-overlay" *ngIf="callState.isConnecting">
+    <div class="loading-content">
+      <div class="spinner-border text-primary" role="status">
+        <span class="sr-only">Connecting...</span>
+      </div>
+      <p>Connecting to video call...</p>
+    </div>
+  </div>
+</div>

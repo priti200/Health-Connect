@@ -1,0 +1,119 @@
+/* HealthConnect Professional Medical Platform Styles */
+
+// Import our design system
+@import 'styles/design-system.scss';
+
+// Import Google Fonts
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+// Global reset and base styles
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  font-size: 16px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  font-family: var(--hc-font-family-primary);
+  font-weight: var(--hc-font-normal);
+  color: var(--hc-gray-800);
+  background-color: var(--hc-white);
+  line-height: var(--hc-leading-normal);
+}
+
+/* Bootstrap Teal Theme Overrides */
+:root {
+  --bs-primary: #0d9488;
+  --bs-primary-rgb: 13, 148, 136;
+  --bs-success: #14b8a6;
+  --bs-info: #5eead4;
+  --bs-warning: #eab308;
+  --bs-danger: #ef4444;
+  --bs-light: #f0fdfa;
+  --bs-dark: #134e4a;
+}
+
+/* Custom utility classes */
+.text-primary-custom {
+  color: var(--hc-primary-600) !important;
+}
+
+.bg-primary-custom {
+  background-color: var(--hc-primary-600) !important;
+}
+
+.btn-primary-custom {
+  background-color: var(--hc-primary-600);
+  border-color: var(--hc-primary-600);
+  color: var(--hc-white);
+}
+
+.btn-primary-custom:hover {
+  background-color: var(--hc-primary-700);
+  border-color: var(--hc-primary-700);
+}
+
+/* Card styles */
+.card {
+  border: none;
+  box-shadow: 0 8px 32px rgba(20, 184, 166, 0.1);
+  border-radius: var(--hc-radius-xl);
+}
+
+.card-header {
+  background-color: transparent;
+  border-bottom: 1px solid var(--hc-primary-100);
+  font-weight: 600;
+  color: var(--hc-gray-800);
+}
+
+/* Form styles */
+.form-control {
+  border-radius: var(--hc-radius-md);
+  border: 1px solid var(--hc-primary-200);
+  color: var(--hc-gray-700);
+}
+
+.form-control:focus {
+  border-color: var(--hc-primary-400);
+  box-shadow: 0 0 0 3px rgba(20, 184, 166, 0.1);
+}
+
+/* Button styles */
+.btn {
+  border-radius: 0.375rem;
+  font-weight: 500;
+  padding: 0.5rem 1rem;
+}
+
+/* Loading spinner */
+.spinner-border-sm {
+  width: 1rem;
+  height: 1rem;
+}
+
+/* Alert styles */
+.alert {
+  border-radius: 0.5rem;
+  border: none;
+}
+
+/* Navigation styles */
+.navbar {
+  box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+}
+
+/* Responsive utilities */
+@media (max-width: 768px) {
+  .container-fluid {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+}

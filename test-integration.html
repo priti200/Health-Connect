@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HealthConnect Integration Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .test-container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        .test-result {
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+        }
+        .success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        .info { background: #d1ecf1; color: #0c5460; border: 1px solid #bee5eb; }
+        button {
+            background: #B91C3C;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover { background: #991B1B; }
+        input {
+            width: 100%;
+            padding: 8px;
+            margin: 5px 0;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        .status-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+        .online { background: #10B981; }
+        .offline { background: #EF4444; }
+    </style>
+</head>
+<body>
+    <h1>🏥 HealthConnect Integration Test</h1>
+    
+    <div class="test-container">
+        <h2>🔗 System Status</h2>
+        <div id="systemStatus">
+            <div><span class="status-indicator offline"></span>Frontend (React): Checking...</div>
+            <div><span class="status-indicator offline"></span>Backend (Spring Boot): Checking...</div>
+            <div><span class="status-indicator offline"></span>Database: Checking...</div>
+            <div><span class="status-indicator offline"></span>WebSocket: Checking...</div>
+        </div>
+        <button onclick="checkSystemStatus()">🔄 Check System Status</button>
+    </div>
+
+    <div class="test-container">
+        <h2>🔐 Authentication Test</h2>
+        <div>
+            <h3>Test Login with Existing Account</h3>
+            <input type="email" id="loginEmail" placeholder="Email" value="doctor.test@healthconnect.com">
+            <input type="password" id="loginPassword" placeholder="Password" value="password123">
+            <button onclick="testLogin()">🔑 Test Login</button>
+        </div>
+        
+        <div style="margin-top: 20px;">
+            <h3>Test Registration</h3>
+            <input type="text" id="regName" placeholder="Full Name" value="Test User">
+            <input type="email" id="regEmail" placeholder="Email" value="test@example.com">
+            <input type="password" id="regPassword" placeholder="Password" value="password123">
+            <select id="regRole">
+                <option value="PATIENT">Patient</option>
+                <option value="DOCTOR">Doctor</option>
+            </select>
+            <button onclick="testRegistration()">📝 Test Registration</button>
+        </div>
+        
+        <div id="authResults"></div>
+    </div>
+
+    <div class="test-container">
+        <h2>📊 Test Results</h2>
+        <div id="testResults"></div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:8080/api';
+        const FRONTEND_URL = 'http://localhost:3001';
+        
+        function addResult(message, type = 'info') {
+            const resultsDiv = document.getElementById('testResults');
+            const div = document.createElement('div');
+            div.className = `test-result ${type}`;
+            div.innerHTML = `${new Date().toLocaleTimeString()}: ${message}`;
+            resultsDiv.appendChild(div);
+            resultsDiv.scrollTop = resultsDiv.scrollHeight;
+        }
+
+        function updateStatus(service, isOnline) {
+            const indicators = document.querySelectorAll('.status-indicator');
+            const statusTexts = document.querySelectorAll('#systemStatus div');
+            
+            let index = -1;
+            if (service === 'frontend') index = 0;
+            else if (service === 'backend') index = 1;
+            else if (service === 'database') index = 2;
+            else if (service === 'websocket') index = 3;
+            
+            if (index >= 0) {
+                indicators[index].className = `status-indicator ${isOnline ? 'online' : 'offline'}`;
+                statusTexts[index].innerHTML = `<span class="status-indicator ${isOnline ? 'online' : 'offline'}"></span>${service.charAt(0).toUpperCase() + service.slice(1)}: ${isOnline ? 'Online ✅' : 'Offline ❌'}`;
+            }
+        }
+
+        async function checkSystemStatus() {
+            addResult('🔍 Checking system status...', 'info');
+            
+            // Check Frontend
+            try {
+                const frontendResponse = await fetch(FRONTEND_URL);
+                updateStatus('frontend', frontendResponse.ok);
+                addResult(`Frontend: ${frontendResponse.ok ? 'Online' : 'Offline'}`, frontendResponse.ok ? 'success' : 'error');
+            } catch (e) {
+                updateStatus('frontend', false);
+                addResult('Frontend: Offline (Connection failed)', 'error');
+            }
+            
+            // Check Backend
+            try {
+                const backendResponse = await fetch(`${API_BASE}/auth/health`);
+                updateStatus('backend', backendResponse.ok);
+                addResult(`Backend: ${backendResponse.ok ? 'Online' : 'Offline'}`, backendResponse.ok ? 'success' : 'error');
+            } catch (e) {
+                updateStatus('backend', false);
+                addResult('Backend: Offline (Connection failed)', 'error');
+            }
+            
+            // Check Database (via backend health endpoint)
+            try {
+                const dbResponse = await fetch(`${API_BASE}/auth/health`);
+                updateStatus('database', dbResponse.ok);
+                addResult(`Database: ${dbResponse.ok ? 'Connected' : 'Disconnected'}`, dbResponse.ok ? 'success' : 'error');
+            } catch (e) {
+                updateStatus('database', false);
+                addResult('Database: Disconnected', 'error');
+            }
+            
+            // Check WebSocket
+            try {
+                const ws = new WebSocket('ws://localhost:8080/ws');
+                ws.onopen = () => {
+                    updateStatus('websocket', true);
+                    addResult('WebSocket: Connected', 'success');
+                    ws.close();
+                };
+                ws.onerror = () => {
+                    updateStatus('websocket', false);
+                    addResult('WebSocket: Connection failed', 'error');
+                };
+            } catch (e) {
+                updateStatus('websocket', false);
+                addResult('WebSocket: Connection failed', 'error');
+            }
+        }
+
+        async function testLogin() {
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+            
+            addResult(`🔑 Testing login for: ${email}`, 'info');
+            
+            try {
+                const response = await fetch(`${API_BASE}/auth/login`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ email, password })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    addResult(`✅ Login successful! Token received for ${data.user.fullName} (${data.user.role})`, 'success');
+                    document.getElementById('authResults').innerHTML = `
+                        <div class="test-result success">
+                            <strong>Login Success!</strong><br>
+                            User: ${data.user.fullName}<br>
+                            Role: ${data.user.role}<br>
+                            Email: ${data.user.email}<br>
+                            Token: ${data.token.substring(0, 20)}...
+                        </div>
+                    `;
+                } else {
+                    addResult(`❌ Login failed: ${data.message || 'Unknown error'}`, 'error');
+                    document.getElementById('authResults').innerHTML = `
+                        <div class="test-result error">
+                            <strong>Login Failed!</strong><br>
+                            Error: ${data.message || 'Unknown error'}
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                addResult(`❌ Login error: ${error.message}`, 'error');
+                document.getElementById('authResults').innerHTML = `
+                    <div class="test-result error">
+                        <strong>Connection Error!</strong><br>
+                        ${error.message}
+                    </div>
+                `;
+            }
+        }
+
+        async function testRegistration() {
+            const fullName = document.getElementById('regName').value;
+            const email = document.getElementById('regEmail').value;
+            const password = document.getElementById('regPassword').value;
+            const role = document.getElementById('regRole').value;
+            
+            addResult(`📝 Testing registration for: ${email}`, 'info');
+            
+            try {
+                const response = await fetch(`${API_BASE}/auth/register`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ 
+                        fullName, 
+                        email, 
+                        password, 
+                        role,
+                        phoneNumber: role === 'DOCTOR' ? '1234567890' : undefined,
+                        specialization: role === 'DOCTOR' ? 'General Medicine' : undefined
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    addResult(`✅ Registration successful! Account created for ${data.user.fullName}`, 'success');
+                    document.getElementById('authResults').innerHTML = `
+                        <div class="test-result success">
+                            <strong>Registration Success!</strong><br>
+                            User: ${data.user.fullName}<br>
+                            Role: ${data.user.role}<br>
+                            Email: ${data.user.email}<br>
+                            Token: ${data.token.substring(0, 20)}...
+                        </div>
+                    `;
+                } else {
+                    addResult(`❌ Registration failed: ${data.message || 'Unknown error'}`, 'error');
+                    document.getElementById('authResults').innerHTML = `
+                        <div class="test-result error">
+                            <strong>Registration Failed!</strong><br>
+                            Error: ${data.message || 'Unknown error'}
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                addResult(`❌ Registration error: ${error.message}`, 'error');
+                document.getElementById('authResults').innerHTML = `
+                    <div class="test-result error">
+                        <strong>Connection Error!</strong><br>
+                        ${error.message}
+                    </div>
+                `;
+            }
+        }
+
+        // Auto-check status on page load
+        window.onload = () => {
+            addResult('🚀 HealthConnect Integration Test Started', 'info');
+            setTimeout(checkSystemStatus, 1000);
+        };
+    </script>
+</body>
+</html>

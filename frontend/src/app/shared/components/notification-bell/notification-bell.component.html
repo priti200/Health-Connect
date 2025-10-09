@@ -1,0 +1,122 @@
+<div class="notification-bell" (clickOutside)="closeDropdown()">
+  <!-- Bell Icon -->
+  <button 
+    type="button" 
+    class="btn btn-link notification-trigger"
+    (click)="toggleDropdown()"
+    [class.has-notifications]="unreadCount > 0">
+    
+    <i class="fas fa-bell"></i>
+    
+    <!-- Unread Count Badge -->
+    <span 
+      *ngIf="unreadCount > 0" 
+      class="badge bg-danger notification-badge">
+      {{ unreadCount > 99 ? '99+' : unreadCount }}
+    </span>
+  </button>
+
+  <!-- Dropdown Menu -->
+  <div 
+    class="notification-dropdown"
+    [class.show]="showDropdown"
+    (click)="$event.stopPropagation()">
+    
+    <!-- Header -->
+    <div class="dropdown-header">
+      <div class="d-flex justify-content-between align-items-center">
+        <h6 class="mb-0">Notifications</h6>
+        <div class="dropdown-actions">
+          <button 
+            *ngIf="unreadCount > 0"
+            type="button" 
+            class="btn btn-sm btn-link text-primary"
+            (click)="markAllAsRead()">
+            Mark all read
+          </button>
+          <button 
+            *ngIf="notifications.length > 0"
+            type="button" 
+            class="btn btn-sm btn-link text-danger"
+            (click)="clearAll()">
+            Clear all
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Notifications List -->
+    <div class="notifications-list">
+      <!-- Loading State -->
+      <div *ngIf="loading" class="text-center py-3">
+        <div class="spinner-border spinner-border-sm" role="status">
+          <span class="visually-hidden">Loading...</span>
+        </div>
+      </div>
+
+      <!-- No Notifications -->
+      <div *ngIf="!loading && notifications.length === 0" class="no-notifications">
+        <div class="text-center py-4">
+          <i class="fas fa-bell-slash fa-2x text-muted mb-2"></i>
+          <p class="text-muted mb-0">No notifications</p>
+        </div>
+      </div>
+
+      <!-- Notification Items -->
+      <div 
+        *ngFor="let notification of notifications; trackBy: trackByNotificationId"
+        [class]="getNotificationClass(notification)"
+        (click)="handleNotificationClick(notification)">
+        
+        <div class="notification-content">
+          <!-- Icon -->
+          <div class="notification-icon">
+            <i [class]="getNotificationIcon(notification.type)"></i>
+          </div>
+
+          <!-- Content -->
+          <div class="notification-body">
+            <div class="notification-title">{{ notification.title }}</div>
+            <div class="notification-message">{{ notification.message }}</div>
+            
+            <!-- From User -->
+            <div *ngIf="notification.fromUser" class="notification-from">
+              <img 
+                *ngIf="notification.fromUser.avatar"
+                [src]="notification.fromUser.avatar" 
+                [alt]="notification.fromUser.name"
+                class="from-avatar">
+              <span class="from-name">{{ notification.fromUser.name }}</span>
+            </div>
+            
+            <!-- Timestamp -->
+            <div class="notification-time">{{ formatTime(notification.timestamp) }}</div>
+          </div>
+
+          <!-- Actions -->
+          <div class="notification-actions">
+            <button 
+              type="button"
+              class="btn btn-sm btn-link text-muted"
+              (click)="removeNotification(notification, $event)"
+              title="Remove notification">
+              <i class="fas fa-times"></i>
+            </button>
+          </div>
+        </div>
+
+        <!-- Unread Indicator -->
+        <div *ngIf="!notification.read" class="unread-indicator"></div>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <div *ngIf="notifications.length > 0" class="dropdown-footer">
+      <a 
+        class="btn btn-sm btn-outline-primary w-100"
+        routerLink="/notifications">
+        View All Notifications
+      </a>
+    </div>
+  </div>
+</div>

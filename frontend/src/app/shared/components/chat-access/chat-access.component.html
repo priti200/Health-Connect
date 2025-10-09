@@ -1,0 +1,14 @@
+<button 
+  type="button"
+  [class]="'btn ' + config.buttonClass + ' ' + buttonSizeClass"
+  [disabled]="loading"
+  (click)="startChat()">
+  
+  <span *ngIf="loading" class="spinner-border spinner-border-sm me-2" role="status">
+    <span class="visually-hidden">Loading...</span>
+  </span>
+  
+  <i *ngIf="!loading && config.showIcon" [class]="iconClass + ' me-2'"></i>
+  
+  {{ config.buttonText }}
+</button>

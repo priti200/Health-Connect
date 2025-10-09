@@ -1,0 +1,294 @@
+<div class="consultation-room" (mousemove)="onMouseMove()">
+  <!-- Loading/Connecting State -->
+  <div *ngIf="isConnecting" class="connecting-overlay">
+    <div class="connecting-content">
+      <div class="spinner-border text-primary mb-3" role="status">
+        <span class="visually-hidden">Connecting...</span>
+      </div>
+      <h4>{{ connectionStatus }}</h4>
+      <p class="text-muted">Please wait while we connect you to the consultation...</p>
+    </div>
+  </div>
+
+  <!-- Error State -->
+  <div *ngIf="error" class="error-overlay">
+    <div class="error-content">
+      <i class="fas fa-exclamation-triangle text-danger mb-3"></i>
+      <h4>Connection Error</h4>
+      <p>{{ error }}</p>
+      <div class="mt-3">
+        <button class="btn btn-primary me-2" (click)="initializeConsultation()">
+          <i class="fas fa-redo me-1"></i>
+          Retry
+        </button>
+        <button class="btn btn-outline-secondary" (click)="leaveConsultation()">
+          <i class="fas fa-arrow-left me-1"></i>
+          Leave
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Recording Indicator -->
+  <div *ngIf="isRecording" class="recording-indicator">
+    <div class="recording-dot"></div>
+    <span>REC {{ formatRecordingDuration() }}</span>
+  </div>
+
+  <!-- Security Notice -->
+  <div *ngIf="!isRecording" class="security-notice">
+    <div class="security-icon">
+      <i class="fas fa-shield-alt"></i>
+    </div>
+    <div class="security-content">
+      <div class="security-title">HIPAA Compliant Session</div>
+      <div class="security-message">This video consultation is encrypted and audit-logged for your privacy and security.</div>
+      <div class="compliance-badges">
+        <span class="badge hipaa-badge">HIPAA Compliant</span>
+        <span class="badge encryption-badge">End-to-End Encrypted</span>
+        <span class="badge audit-badge">Audit Logged</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Security Notice -->
+  <div class="security-notice" *ngIf="!isRecording">
+    <i class="fas fa-shield-alt"></i>
+    <span>HIPAA Compliant • End-to-End Encrypted</span>
+  </div>
+
+  <!-- Main Video Interface -->
+  <div *ngIf="isCallActive && !error" class="video-container">
+    <!-- Remote Video (Main) -->
+    <div class="remote-video-container">
+      <video 
+        #remoteVideo 
+        class="remote-video" 
+        autoplay 
+        playsinline>
+      </video>
+      
+      <!-- Remote Video Placeholder -->
+      <div *ngIf="!remoteVideo?.srcObject" class="video-placeholder remote-placeholder">
+        <div class="placeholder-content">
+          <i class="fas fa-user-circle"></i>
+          <p>Waiting for {{ currentUser?.role === 'DOCTOR' ? 'patient' : 'doctor' }}...</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Local Video (Picture-in-Picture) -->
+    <div class="local-video-container" [class.screen-sharing]="isScreenSharing">
+      <video 
+        #localVideo 
+        class="local-video" 
+        autoplay 
+        playsinline 
+        muted>
+      </video>
+      
+      <!-- Local Video Placeholder -->
+      <div *ngIf="!localVideo?.srcObject" class="video-placeholder local-placeholder">
+        <i class="fas fa-user"></i>
+      </div>
+      
+      <!-- Video Status Indicators -->
+      <div class="video-status">
+        <span *ngIf="!isVideoEnabled" class="status-indicator video-off">
+          <i class="fas fa-video-slash"></i>
+        </span>
+        <span *ngIf="!isAudioEnabled" class="status-indicator audio-off">
+          <i class="fas fa-microphone-slash"></i>
+        </span>
+      </div>
+    </div>
+
+    <!-- Top Bar -->
+    <div class="top-bar" [class.visible]="isControlsVisible">
+      <div class="consultation-info">
+        <h6 class="mb-0" *ngIf="consultation">
+          <i class="fas fa-video me-2"></i>
+          Consultation with 
+          {{ currentUser?.role === 'DOCTOR' ? 
+              consultation.patient.firstName + ' ' + consultation.patient.lastName :
+              'Dr. ' + consultation.doctor.firstName + ' ' + consultation.doctor.lastName }}
+        </h6>
+        <small class="text-muted">Room: {{ roomId }}</small>
+      </div>
+      
+      <div class="top-actions">
+        <button 
+          class="btn btn-outline-light btn-sm me-2"
+          (click)="toggleParticipants()"
+          [class.active]="showParticipants">
+          <i class="fas fa-users"></i>
+        </button>
+        
+        <button 
+          class="btn btn-outline-light btn-sm"
+          (click)="toggleChat()"
+          [class.active]="isChatOpen">
+          <i class="fas fa-comments"></i>
+          <span *ngIf="messages.length > 0" class="badge bg-primary ms-1">{{ messages.length }}</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Bottom Controls -->
+    <div class="bottom-controls" [class.visible]="isControlsVisible">
+      <div class="control-buttons">
+        <!-- Audio Toggle -->
+        <button
+          class="btn control-btn"
+          [class.btn-danger]="!isAudioEnabled"
+          [class.btn-success]="isAudioEnabled"
+          (click)="toggleAudio()"
+          title="Toggle Microphone">
+          <i class="fas" [class.fa-microphone]="isAudioEnabled" [class.fa-microphone-slash]="!isAudioEnabled"></i>
+        </button>
+
+        <!-- Video Toggle -->
+        <button
+          class="btn control-btn"
+          [class.btn-danger]="!isVideoEnabled"
+          [class.btn-success]="isVideoEnabled"
+          (click)="toggleVideo()"
+          title="Toggle Camera">
+          <i class="fas" [class.fa-video]="isVideoEnabled" [class.fa-video-slash]="!isVideoEnabled"></i>
+        </button>
+
+        <!-- Screen Share -->
+        <button
+          class="btn control-btn"
+          [class.btn-primary]="isScreenSharing"
+          [class.btn-outline-light]="!isScreenSharing"
+          (click)="toggleScreenShare()"
+          title="Share Screen">
+          <i class="fas fa-desktop"></i>
+        </button>
+
+        <!-- Chat -->
+        <button
+          class="btn control-btn btn-outline-light"
+          (click)="toggleChat()"
+          [class.active]="isChatOpen"
+          title="Toggle Chat">
+          <i class="fas fa-comments"></i>
+
+        </button>
+
+
+
+        <!-- End Call -->
+        <button
+          class="btn control-btn btn-danger"
+          (click)="endConsultation()"
+          title="End Consultation">
+          <i class="fas fa-phone-slash"></i>
+        </button>
+      </div>
+      
+      <!-- Connection Status -->
+      <div class="connection-status">
+        <span class="status-text">{{ connectionStatus }}</span>
+        <div class="status-indicator" 
+             [class.connected]="connectionStatus === 'Connected'"
+             [class.connecting]="connectionStatus.includes('Connecting')"
+             [class.error]="connectionStatus.includes('failed') || connectionStatus.includes('disconnected')">
+        </div>
+      </div>
+    </div>
+
+    <!-- Participants Panel -->
+    <div class="participants-panel" [class.open]="showParticipants" *ngIf="consultation">
+      <div class="panel-header">
+        <h6 class="mb-0">
+          <i class="fas fa-users me-2"></i>
+          Participants
+        </h6>
+        <button class="btn btn-sm btn-outline-light" (click)="toggleParticipants()">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      
+      <div class="panel-content">
+        <!-- Doctor -->
+        <div class="participant-item">
+          <div class="participant-avatar bg-primary">
+            <i class="fas fa-user-md"></i>
+          </div>
+          <div class="participant-info">
+            <div class="participant-name">Dr. {{ consultation.doctor.firstName }} {{ consultation.doctor.lastName }}</div>
+            <div class="participant-role">{{ consultation.doctor.specialization }}</div>
+          </div>
+          <div class="participant-status">
+            <i class="fas fa-circle text-success" title="Online"></i>
+          </div>
+        </div>
+
+        <!-- Patient -->
+        <div class="participant-item">
+          <div class="participant-avatar bg-info">
+            <i class="fas fa-user"></i>
+          </div>
+          <div class="participant-info">
+            <div class="participant-name">{{ consultation.patient.firstName }} {{ consultation.patient.lastName }}</div>
+            <div class="participant-role">Patient</div>
+          </div>
+          <div class="participant-status">
+            <i class="fas fa-circle text-success" title="Online"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Chat Panel -->
+    <div class="chat-panel" [class.open]="isChatOpen">
+      <div class="panel-header">
+        <h6 class="mb-0">
+          <i class="fas fa-comments me-2"></i>
+          Consultation Chat
+        </h6>
+        <button class="btn btn-sm btn-outline-light" (click)="toggleChat()">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      
+      <div class="panel-content">
+        <!-- Messages -->
+        <div class="messages-container">
+          <div *ngFor="let message of messages" class="message-item"
+               [class.own-message]="message.senderId === currentUser?.id">
+            <div class="message-content">
+              <div class="message-text">{{ message.content }}</div>
+              <div class="message-time">{{ formatTime(message.timestamp) }}</div>
+            </div>
+          </div>
+          
+          <div *ngIf="messages.length === 0" class="no-messages">
+            <i class="fas fa-comments text-muted"></i>
+            <p class="text-muted">No messages yet. Start the conversation!</p>
+          </div>
+        </div>
+        
+        <!-- Message Input -->
+        <div class="message-input">
+          <div class="input-group">
+            <input 
+              type="text" 
+              class="form-control" 
+              placeholder="Type a message..."
+              [(ngModel)]="newMessage"
+              (keyup.enter)="sendMessage()">
+            <button 
+              class="btn btn-primary" 
+              (click)="sendMessage()"
+              [disabled]="!newMessage.trim()">
+              <i class="fas fa-paper-plane"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

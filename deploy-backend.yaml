@@ -1,0 +1,65 @@
+# Google Cloud Build configuration for Backend Only
+steps:
+  # Build Backend Docker Image
+  - name: 'gcr.io/cloud-builders/docker'
+    args:
+      - 'build'
+      - '-t'
+      - 'gcr.io/said-eb2f5/healthconnect-backend:$BUILD_ID'
+      - '-t'
+      - 'gcr.io/said-eb2f5/healthconnect-backend:latest'
+      - './backend'
+    id: 'build-backend'
+
+  # Push Backend Image to Container Registry
+  - name: 'gcr.io/cloud-builders/docker'
+    args:
+      - 'push'
+      - 'gcr.io/said-eb2f5/healthconnect-backend:$BUILD_ID'
+    id: 'push-backend'
+    waitFor: ['build-backend']
+
+  # Deploy Backend to Cloud Run
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    entrypoint: 'gcloud'
+    args:
+      - 'run'
+      - 'deploy'
+      - 'healthconnect-backend'
+      - '--image'
+      - 'gcr.io/said-eb2f5/healthconnect-backend:$BUILD_ID'
+      - '--region'
+      - 'us-central1'
+      - '--platform'
+      - 'managed'
+      - '--allow-unauthenticated'
+      - '--port'
+      - '8080'
+      - '--memory'
+      - '1Gi'
+      - '--cpu'
+      - '1'
+      - '--max-instances'
+      - '3'
+      - '--min-instances'
+      - '0'
+      - '--concurrency'
+      - '80'
+      - '--timeout'
+      - '300'
+      - '--set-env-vars'
+      - 'SPRING_PROFILES_ACTIVE=prod,SPRING_DATASOURCE_URL=jdbc:h2:mem:healthconnect,SPRING_DATASOURCE_DRIVER_CLASS_NAME=org.h2.Driver,SPRING_DATASOURCE_USERNAME=sa,SPRING_DATASOURCE_PASSWORD=,SPRING_JPA_DATABASE_PLATFORM=org.hibernate.dialect.H2Dialect,SPRING_H2_CONSOLE_ENABLED=false,CORS_ALLOWED_ORIGINS=*'
+    id: 'deploy-backend'
+    waitFor: ['push-backend']
+
+# Store backend image in Container Registry
+images:
+  - 'gcr.io/said-eb2f5/healthconnect-backend:$BUILD_ID'
+  - 'gcr.io/said-eb2f5/healthconnect-backend:latest'
+
+# Build options optimized for free tier
+options:
+  logging: CLOUD_LOGGING_ONLY
+
+# Build timeout
+timeout: '1800s'

@@ -1,0 +1,133 @@
+.doctor-availability {
+  .status-indicator {
+    display: flex;
+    align-items: center;
+    
+    &.status-online {
+      .status-text {
+        color: #28a745;
+      }
+    }
+    
+    &.status-busy {
+      .status-text {
+        color: #ffc107;
+      }
+    }
+    
+    &.status-away {
+      .status-text {
+        color: #17a2b8;
+      }
+    }
+    
+    &.status-dnd {
+      .status-text {
+        color: #dc3545;
+      }
+    }
+    
+    &.status-offline {
+      .status-text {
+        color: #6c757d;
+      }
+    }
+  }
+  
+  .availability-details {
+    .detail-item {
+      display: flex;
+      align-items: center;
+      margin-bottom: 0.25rem;
+      
+      &:last-child {
+        margin-bottom: 0;
+      }
+      
+      i {
+        width: 14px;
+        font-size: 0.75rem;
+      }
+    }
+    
+    .alert {
+      font-size: 0.75rem;
+      border-radius: 4px;
+    }
+  }
+  
+  // Size variations
+  &.size-sm {
+    .status-indicator {
+      font-size: 0.875rem;
+      
+      i {
+        font-size: 0.75rem;
+      }
+    }
+  }
+  
+  &.size-lg {
+    .status-indicator {
+      font-size: 1.125rem;
+      
+      i {
+        font-size: 1rem;
+      }
+      
+      .status-text {
+        font-weight: 500;
+      }
+    }
+    
+    .availability-details {
+      margin-top: 0.75rem;
+      
+      .detail-item {
+        margin-bottom: 0.5rem;
+        
+        i {
+          width: 16px;
+          font-size: 0.875rem;
+        }
+        
+        small {
+          font-size: 0.875rem;
+        }
+      }
+    }
+  }
+}
+
+// Pulsing animation for online status
+.status-online i {
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+// Responsive design
+@media (max-width: 576px) {
+  .doctor-availability {
+    .availability-details {
+      .detail-item {
+        flex-direction: column;
+        align-items: flex-start;
+        
+        i {
+          margin-bottom: 0.25rem;
+        }
+      }
+    }
+  }
+}

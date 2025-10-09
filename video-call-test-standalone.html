@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HealthConnect Video Call Test</title>
+    <script src="https://download.agora.io/sdk/release/AgoraRTC_N-4.20.2.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #1a1a2e;
+            color: white;
+            padding: 20px;
+            margin: 0;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .status {
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+            text-align: center;
+            font-weight: bold;
+        }
+        .status.connecting { background: #ff9800; }
+        .status.connected { background: #4caf50; }
+        .status.error { background: #f44336; }
+        .status.disconnected { background: #9e9e9e; }
+        .controls {
+            text-align: center;
+            margin: 20px 0;
+        }
+        .controls button {
+            background: #2196f3;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            margin: 5px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        .controls button:hover {
+            background: #1976d2;
+        }
+        .controls button:disabled {
+            background: #666;
+            cursor: not-allowed;
+        }
+        .controls button.danger {
+            background: #f44336;
+        }
+        .controls button.danger:hover {
+            background: #d32f2f;
+        }
+        .video-container {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            margin: 30px 0;
+            flex-wrap: wrap;
+        }
+        .video-box {
+            background: #16213e;
+            border-radius: 10px;
+            padding: 15px;
+            text-align: center;
+            min-width: 320px;
+        }
+        .video-box h3 {
+            margin-top: 0;
+            color: #64b5f6;
+        }
+        .video-placeholder {
+            width: 320px;
+            height: 240px;
+            background: #0f3460;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #888;
+            font-size: 18px;
+        }
+        .config-section {
+            background: #16213e;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+        .config-section h3 {
+            color: #64b5f6;
+            margin-top: 0;
+        }
+        .form-group {
+            margin: 15px 0;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: #ccc;
+        }
+        .form-group input {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #555;
+            border-radius: 4px;
+            background: #2a2a3e;
+            color: white;
+            box-sizing: border-box;
+        }
+        .logs {
+            background: #0a0a0a;
+            padding: 15px;
+            border-radius: 5px;
+            height: 200px;
+            overflow-y: auto;
+            font-family: monospace;
+            font-size: 12px;
+            margin-top: 20px;
+        }
+        .log-entry {
+            margin: 2px 0;
+            padding: 2px 0;
+        }
+        .log-info { color: #64b5f6; }
+        .log-success { color: #4caf50; }
+        .log-warning { color: #ff9800; }
+        .log-error { color: #f44336; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🏥 HealthConnect Video Call Test</h1>
+            <p>Standalone test page for Agora video calling functionality</p>
+        </div>
+
+        <div class="status" id="status">Ready to start video call</div>
+
+        <div class="config-section">
+            <h3>Configuration</h3>
+            <div class="form-group">
+                <label for="channelName">Channel Name (Room ID):</label>
+                <input type="text" id="channelName" value="healthconnect-test-room" placeholder="Enter room ID">
+            </div>
+            <div class="form-group">
+                <label for="userId">User ID:</label>
+                <input type="number" id="userId" value="12345" placeholder="Enter user ID">
+            </div>
+            <div class="form-group">
+                <label for="appId">Agora App ID:</label>
+                <input type="text" id="appId" value="e4e46730b7c246babef60cdf947704e3" placeholder="Enter Agora App ID">
+            </div>
+        </div>
+
+        <div class="controls">
+            <button id="joinBtn" onclick="joinCall()">Join Video Call</button>
+            <button id="leaveBtn" onclick="leaveCall()" disabled>Leave Call</button>
+            <button id="muteAudioBtn" onclick="toggleAudio()" disabled>Mute Audio</button>
+            <button id="muteVideoBtn" onclick="toggleVideo()" disabled>Turn Off Video</button>
+            <button onclick="clearLogs()">Clear Logs</button>
+        </div>
+
+        <div class="video-container">
+            <div class="video-box">
+                <h3>Your Video</h3>
+                <div id="localVideo" class="video-placeholder">
+                    Camera not started
+                </div>
+            </div>
+            <div class="video-box">
+                <h3>Remote Participant</h3>
+                <div id="remoteVideo" class="video-placeholder">
+                    Waiting for participant...
+                </div>
+            </div>
+        </div>
+
+        <div class="logs" id="logs"></div>
+    </div>
+
+    <script>
+        // Agora client and tracks
+        let agoraClient = null;
+        let localAudioTrack = null;
+        let localVideoTrack = null;
+        let remoteUsers = {};
+        let isAudioMuted = false;
+        let isVideoMuted = false;
+
+        // UI elements
+        const statusEl = document.getElementById('status');
+        const logsEl = document.getElementById('logs');
+        const joinBtn = document.getElementById('joinBtn');
+        const leaveBtn = document.getElementById('leaveBtn');
+        const muteAudioBtn = document.getElementById('muteAudioBtn');
+        const muteVideoBtn = document.getElementById('muteVideoBtn');
+
+        function updateStatus(message, type = 'info') {
+            statusEl.textContent = message;
+            statusEl.className = `status ${type}`;
+            log(message, type);
+        }
+
+        function log(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            const logEntry = document.createElement('div');
+            logEntry.className = `log-entry log-${type}`;
+            logEntry.textContent = `[${timestamp}] ${message}`;
+            logsEl.appendChild(logEntry);
+            logsEl.scrollTop = logsEl.scrollHeight;
+        }
+
+        function clearLogs() {
+            logsEl.innerHTML = '';
+        }
+
+        async function joinCall() {
+            try {
+                const channelName = document.getElementById('channelName').value;
+                const userId = parseInt(document.getElementById('userId').value);
+                const appId = document.getElementById('appId').value;
+
+                if (!channelName || !userId || !appId) {
+                    updateStatus('Please fill in all configuration fields', 'error');
+                    return;
+                }
+
+                updateStatus('Connecting to video call...', 'connecting');
+                log('Starting Agora Video initialization...');
+
+                // Initialize Agora client
+                agoraClient = AgoraRTC.createClient({ mode: 'rtc', codec: 'vp8' });
+                log('Agora client created successfully');
+
+                // Setup event handlers
+                setupEventHandlers();
+
+                // Join channel (using null token for demo)
+                log(`Joining channel: ${channelName} with UID: ${userId}`);
+                await agoraClient.join(appId, channelName, null, userId);
+                log('Successfully joined channel');
+
+                // Create local tracks
+                log('Creating local audio and video tracks...');
+                localAudioTrack = await AgoraRTC.createMicrophoneAudioTrack();
+                localVideoTrack = await AgoraRTC.createCameraVideoTrack();
+                log('Local tracks created successfully');
+
+                // Play local video
+                localVideoTrack.play('localVideo');
+                log('Local video track playing');
+
+                // Publish tracks
+                await agoraClient.publish([localAudioTrack, localVideoTrack]);
+                log('Local tracks published successfully');
+
+                updateStatus('✅ Connected and ready for video call!', 'connected');
+
+                // Update UI
+                joinBtn.disabled = true;
+                leaveBtn.disabled = false;
+                muteAudioBtn.disabled = false;
+                muteVideoBtn.disabled = false;
+
+            } catch (error) {
+                log(`Error joining call: ${error.message}`, 'error');
+                updateStatus('Failed to join video call', 'error');
+                console.error('Join call error:', error);
+            }
+        }
+
+        async function leaveCall() {
+            try {
+                updateStatus('Leaving call...', 'connecting');
+
+                // Close local tracks
+                if (localAudioTrack) {
+                    localAudioTrack.close();
+                    localAudioTrack = null;
+                }
+                if (localVideoTrack) {
+                    localVideoTrack.close();
+                    localVideoTrack = null;
+                }
+
+                // Leave channel
+                if (agoraClient) {
+                    await agoraClient.leave();
+                    agoraClient = null;
+                }
+
+                // Clear remote users
+                remoteUsers = {};
+
+                // Reset UI
+                document.getElementById('localVideo').innerHTML = 'Camera not started';
+                document.getElementById('remoteVideo').innerHTML = 'Waiting for participant...';
+
+                updateStatus('Disconnected from video call', 'disconnected');
+                log('Successfully left the call');
+
+                // Update buttons
+                joinBtn.disabled = false;
+                leaveBtn.disabled = true;
+                muteAudioBtn.disabled = true;
+                muteVideoBtn.disabled = true;
+                isAudioMuted = false;
+                isVideoMuted = false;
+                muteAudioBtn.textContent = 'Mute Audio';
+                muteVideoBtn.textContent = 'Turn Off Video';
+
+            } catch (error) {
+                log(`Error leaving call: ${error.message}`, 'error');
+                console.error('Leave call error:', error);
+            }
+        }
+
+        async function toggleAudio() {
+            try {
+                if (localAudioTrack) {
+                    await localAudioTrack.setEnabled(!isAudioMuted);
+                    isAudioMuted = !isAudioMuted;
+                    muteAudioBtn.textContent = isAudioMuted ? 'Unmute Audio' : 'Mute Audio';
+                    log(`Audio ${isAudioMuted ? 'muted' : 'unmuted'}`);
+                }
+            } catch (error) {
+                log(`Error toggling audio: ${error.message}`, 'error');
+            }
+        }
+
+        async function toggleVideo() {
+            try {
+                if (localVideoTrack) {
+                    await localVideoTrack.setEnabled(!isVideoMuted);
+                    isVideoMuted = !isVideoMuted;
+                    muteVideoBtn.textContent = isVideoMuted ? 'Turn On Video' : 'Turn Off Video';
+                    log(`Video ${isVideoMuted ? 'disabled' : 'enabled'}`);
+                }
+            } catch (error) {
+                log(`Error toggling video: ${error.message}`, 'error');
+            }
+        }
+
+        function setupEventHandlers() {
+            // Handle remote user published
+            agoraClient.on('user-published', async (user, mediaType) => {
+                log(`Remote user published: ${user.uid} (${mediaType})`, 'success');
+                
+                await agoraClient.subscribe(user, mediaType);
+                remoteUsers[user.uid] = user;
+
+                if (mediaType === 'video') {
+                    user.videoTrack.play('remoteVideo');
+                    log('Remote video track playing', 'success');
+                    updateStatus('✅ Connected with remote participant!', 'connected');
+                }
+
+                if (mediaType === 'audio') {
+                    user.audioTrack.play();
+                    log('Remote audio track playing', 'success');
+                }
+            });
+
+            // Handle remote user unpublished
+            agoraClient.on('user-unpublished', (user, mediaType) => {
+                log(`Remote user unpublished: ${user.uid} (${mediaType})`, 'warning');
+                
+                if (mediaType === 'video') {
+                    document.getElementById('remoteVideo').innerHTML = 'Waiting for participant...';
+                }
+            });
+
+            // Handle remote user left
+            agoraClient.on('user-left', (user) => {
+                log(`Remote user left: ${user.uid}`, 'warning');
+                delete remoteUsers[user.uid];
+                document.getElementById('remoteVideo').innerHTML = 'Waiting for participant...';
+                updateStatus('Remote participant left the call', 'disconnected');
+            });
+
+            // Handle connection state changes
+            agoraClient.on('connection-state-change', (curState, revState) => {
+                log(`Connection state: ${revState} → ${curState}`, 'info');
+                if (curState === 'DISCONNECTED') {
+                    updateStatus('Connection lost', 'error');
+                }
+            });
+        }
+
+        // Initialize
+        log('HealthConnect Video Call Test initialized');
+        log('Ready to start video calling');
+    </script>
+</body>
+</html>

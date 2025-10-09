@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HealthConnect - Video Calling Test</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 30px;
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 8px 32px rgba(31, 38, 135, 0.37);
+        }
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        .status {
+            background: rgba(76, 175, 80, 0.2);
+            border: 2px solid #4CAF50;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+        }
+        .instructions {
+            background: rgba(33, 150, 243, 0.2);
+            border: 2px solid #2196F3;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+        }
+        .step {
+            margin: 15px 0;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            border-left: 4px solid #FFC107;
+        }
+        .button {
+            display: inline-block;
+            padding: 15px 30px;
+            background: #4CAF50;
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: bold;
+            margin: 10px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(76, 175, 80, 0.3);
+        }
+        .button:hover {
+            background: #45a049;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(76, 175, 80, 0.4);
+        }
+        .button.secondary {
+            background: #2196F3;
+            box-shadow: 0 4px 15px rgba(33, 150, 243, 0.3);
+        }
+        .button.secondary:hover {
+            background: #1976D2;
+            box-shadow: 0 6px 20px rgba(33, 150, 243, 0.4);
+        }
+        .credentials {
+            background: rgba(255, 193, 7, 0.2);
+            border: 2px solid #FFC107;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+        .highlight {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-family: 'Courier New', monospace;
+            font-weight: bold;
+        }
+        .center {
+            text-align: center;
+        }
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin: 30px 0;
+        }
+        .feature {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+        }
+        .feature h3 {
+            color: #4CAF50;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎥 HealthConnect Video Calling Test</h1>
+        
+        <div class="status">
+            <h2>✅ System Status: READY FOR TESTING</h2>
+            <p><strong>Backend:</strong> Running on http://localhost:8080</p>
+            <p><strong>Frontend:</strong> Running on http://localhost:4200</p>
+            <p><strong>Video Consultation:</strong> Created and Ready</p>
+            <p><strong>Room ID:</strong> <span class="highlight">demo_room_1750273331807</span></p>
+        </div>
+
+        <div class="credentials">
+            <h2>🔑 Test Credentials</h2>
+            <p><strong>Patient Login:</strong> <span class="highlight">patient.test@healthconnect.com</span> / <span class="highlight">password123</span></p>
+            <p><strong>Doctor Login:</strong> <span class="highlight">doctor.test@healthconnect.com</span> / <span class="highlight">password123</span></p>
+        </div>
+
+        <div class="instructions">
+            <h2>📋 Testing Instructions</h2>
+            <div class="step">
+                <strong>Step 1:</strong> Open HealthConnect in your browser: 
+                <a href="http://localhost:4200" class="button secondary" target="_blank">Open HealthConnect</a>
+            </div>
+            <div class="step">
+                <strong>Step 2:</strong> Login as Patient using credentials above
+            </div>
+            <div class="step">
+                <strong>Step 3:</strong> Go directly to Video Consultation: 
+                <a href="http://localhost:4200/telemedicine/consultation/1" class="button" target="_blank">Join Video Call</a>
+            </div>
+            <div class="step">
+                <strong>Step 4:</strong> Click "Join Consultation" button
+            </div>
+            <div class="step">
+                <strong>Step 5:</strong> Allow camera and microphone access when prompted
+            </div>
+            <div class="step">
+                <strong>Step 6:</strong> Your video call will be active! 🎉
+            </div>
+        </div>
+
+        <div class="features">
+            <div class="feature">
+                <h3>📹 Real Video Calling</h3>
+                <p>WebRTC-based video calling with your actual camera and microphone</p>
+            </div>
+            <div class="feature">
+                <h3>⏱️ Call Timer</h3>
+                <p>Real-time call duration tracking</p>
+            </div>
+            <div class="feature">
+                <h3>🎛️ Video Controls</h3>
+                <p>Toggle video/audio, end call functionality</p>
+            </div>
+            <div class="feature">
+                <h3>👨‍⚕️ Professional UI</h3>
+                <p>Clean, modern medical consultation interface</p>
+            </div>
+        </div>
+
+        <div class="center">
+            <h2>🚀 Quick Access Links</h2>
+            <a href="http://localhost:4200" class="button secondary" target="_blank">HealthConnect Home</a>
+            <a href="http://localhost:4200/telemedicine/consultation/1" class="button" target="_blank">Direct Video Call</a>
+            <a href="http://localhost:8080/api/test/video-demo" class="button secondary" target="_blank">API Status</a>
+        </div>
+
+        <div class="status" style="margin-top: 30px;">
+            <h2>🎯 For Your Review Tomorrow</h2>
+            <p>✅ <strong>Appointments:</strong> Patient bookings appear on doctor dashboard</p>
+            <p>✅ <strong>Video Calling:</strong> Fully functional with real camera access</p>
+            <p>✅ <strong>Professional Interface:</strong> Clean medical consultation UI</p>
+            <p>✅ <strong>Real-time Features:</strong> Call timer, video controls, professional layout</p>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>🎥 Test Real HealthConnect Video Calling</title>
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+            margin: 0; 
+            padding: 20px; 
+            background: #f5f5f5;
+        }
+        .container { 
+            max-width: 1000px; 
+            margin: 0 auto; 
+            background: white; 
+            border-radius: 10px; 
+            padding: 20px; 
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .test-section { 
+            margin: 20px 0; 
+            padding: 15px; 
+            border: 1px solid #ddd; 
+            border-radius: 8px; 
+            background: #fafafa;
+        }
+        .controls { 
+            display: flex; 
+            gap: 10px; 
+            margin: 10px 0; 
+            flex-wrap: wrap;
+        }
+        button { 
+            padding: 12px 20px; 
+            border: none; 
+            border-radius: 5px; 
+            cursor: pointer; 
+            font-weight: bold;
+            font-size: 14px;
+        }
+        .btn-primary { background: #2196F3; color: white; }
+        .btn-success { background: #4CAF50; color: white; }
+        .btn-danger { background: #f44336; color: white; }
+        .btn-warning { background: #ff9800; color: white; }
+        .info-panel {
+            background: #e3f2fd;
+            border: 1px solid #2196F3;
+            border-radius: 5px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+        .status {
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+            font-weight: bold;
+        }
+        .status.success { background: #d4edda; color: #155724; }
+        .status.info { background: #d1ecf1; color: #0c5460; }
+        .status.warning { background: #fff3cd; color: #856404; }
+        .user-credentials {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 5px;
+            padding: 15px;
+            margin: 10px 0;
+        }
+        .step {
+            background: #fff;
+            border-left: 4px solid #2196F3;
+            padding: 15px;
+            margin: 10px 0;
+        }
+        .step h4 {
+            margin-top: 0;
+            color: #2196F3;
+        }
+        .highlight {
+            background: #ffeb3b;
+            padding: 2px 4px;
+            border-radius: 3px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎥 Test Real HealthConnect Video Calling</h1>
+        
+        <div class="info-panel">
+            <h3>📋 Real Application Video Calling Test</h3>
+            <p>This guide will help you test the video calling feature in the actual HealthConnect application.</p>
+            <p><strong>✅ Backend is running:</strong> http://localhost:8080</p>
+            <p><strong>✅ Frontend is running:</strong> http://localhost:4200</p>
+            <p><strong>✅ Test users created and consultation room ready</strong></p>
+        </div>
+
+        <div class="user-credentials">
+            <h4>👥 Test User Credentials</h4>
+            <div style="display: flex; gap: 20px;">
+                <div>
+                    <strong>👤 Patient:</strong><br>
+                    Email: <span class="highlight">emma.wilson@demo.com</span><br>
+                    Password: <span class="highlight">demo123</span>
+                </div>
+                <div>
+                    <strong>👨‍⚕️ Doctor:</strong><br>
+                    Email: <span class="highlight">dr.chen@demo.com</span><br>
+                    Password: <span class="highlight">demo123</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h3>🚀 Quick Access Links</h3>
+            <div class="controls">
+                <button class="btn-primary" onclick="openPatientLogin()">👤 Patient Login</button>
+                <button class="btn-primary" onclick="openDoctorLogin()">👨‍⚕️ Doctor Login</button>
+                <button class="btn-success" onclick="openConsultationRoom()">🎥 Direct to Consultation Room</button>
+                <button class="btn-warning" onclick="openDoctorDashboard()">📊 Doctor Dashboard</button>
+            </div>
+        </div>
+
+        <div class="step">
+            <h4>Step 1: Login as Patient</h4>
+            <p>1. Click "Patient Login" above</p>
+            <p>2. Use credentials: <strong>emma.wilson@demo.com</strong> / <strong>demo123</strong></p>
+            <p>3. Navigate to appointments or telemedicine section</p>
+            <div class="controls">
+                <button class="btn-primary" onclick="openPatientLogin()">👤 Open Patient Login</button>
+            </div>
+        </div>
+
+        <div class="step">
+            <h4>Step 2: Login as Doctor (New Tab/Window)</h4>
+            <p>1. Open a new browser tab/window</p>
+            <p>2. Click "Doctor Login" above</p>
+            <p>3. Use credentials: <strong>dr.chen@demo.com</strong> / <strong>demo123</strong></p>
+            <p>4. Check appointments dashboard for the video consultation</p>
+            <div class="controls">
+                <button class="btn-primary" onclick="openDoctorLoginNewTab()">👨‍⚕️ Open Doctor Login (New Tab)</button>
+            </div>
+        </div>
+
+        <div class="step">
+            <h4>Step 3: Test Video Consultation Room</h4>
+            <p>1. Both users should navigate to the consultation room</p>
+            <p>2. Room ID: <strong>room_ce48f8a711314d2b9e28dd07b931c5a3</strong></p>
+            <p>3. Allow camera and microphone permissions when prompted</p>
+            <p>4. Test video calling features</p>
+            <div class="controls">
+                <button class="btn-success" onclick="openConsultationRoom()">🎥 Open Consultation Room</button>
+                <button class="btn-success" onclick="openConsultationRoomNewTab()">🎥 Open Room (New Tab)</button>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h3>🔍 What to Test</h3>
+            <ul>
+                <li>✅ <strong>Camera Access:</strong> Both users should see their own video</li>
+                <li>✅ <strong>WebSocket Connection:</strong> Check browser console for connection messages</li>
+                <li>✅ <strong>WebRTC Signaling:</strong> Look for offer/answer/ICE candidate messages</li>
+                <li>✅ <strong>Remote Video:</strong> Each user should see the other's video stream</li>
+                <li>✅ <strong>Audio/Video Controls:</strong> Mute/unmute buttons should work</li>
+                <li>✅ <strong>Screen Sharing:</strong> Test screen sharing functionality</li>
+                <li>✅ <strong>Chat:</strong> Test real-time messaging during video call</li>
+            </ul>
+        </div>
+
+        <div class="test-section">
+            <h3>🛠️ Troubleshooting</h3>
+            <div class="status info">
+                <strong>If video doesn't appear:</strong>
+                <ul>
+                    <li>Check browser console for errors</li>
+                    <li>Ensure camera/microphone permissions are granted</li>
+                    <li>Verify WebSocket connection is established</li>
+                    <li>Check that both users are in the same room</li>
+                </ul>
+            </div>
+            <div class="controls">
+                <button class="btn-warning" onclick="checkBackendStatus()">🔍 Check Backend Status</button>
+                <button class="btn-warning" onclick="testWebSocketConnection()">🔌 Test WebSocket</button>
+            </div>
+            <div id="troubleshoot-results"></div>
+        </div>
+
+        <div class="test-section">
+            <h3>📊 Expected Results</h3>
+            <div class="status success">
+                <strong>✅ Successful Video Call Test Should Show:</strong>
+                <ul>
+                    <li>Both users can see their own video (local stream)</li>
+                    <li>Both users can see each other's video (remote stream)</li>
+                    <li>Audio/video controls work properly</li>
+                    <li>WebSocket messages appear in browser console</li>
+                    <li>WebRTC peer connection established</li>
+                    <li>Real-time chat messaging works</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const CONFIG = {
+            FRONTEND_URL: 'http://localhost:4200',
+            BACKEND_URL: 'http://localhost:8080',
+            ROOM_ID: 'room_ce48f8a711314d2b9e28dd07b931c5a3'
+        };
+
+        function openPatientLogin() {
+            window.open(`${CONFIG.FRONTEND_URL}/auth/login`, '_self');
+        }
+
+        function openDoctorLogin() {
+            window.open(`${CONFIG.FRONTEND_URL}/auth/login`, '_self');
+        }
+
+        function openDoctorLoginNewTab() {
+            window.open(`${CONFIG.FRONTEND_URL}/auth/login`, '_blank');
+        }
+
+        function openConsultationRoom() {
+            window.open(`${CONFIG.FRONTEND_URL}/telemedicine/room/${CONFIG.ROOM_ID}`, '_self');
+        }
+
+        function openConsultationRoomNewTab() {
+            window.open(`${CONFIG.FRONTEND_URL}/telemedicine/room/${CONFIG.ROOM_ID}`, '_blank');
+        }
+
+        function openDoctorDashboard() {
+            window.open(`${CONFIG.FRONTEND_URL}/telemedicine/doctor-dashboard`, '_blank');
+        }
+
+        async function checkBackendStatus() {
+            const resultsDiv = document.getElementById('troubleshoot-results');
+            resultsDiv.innerHTML = '<p>Checking backend status...</p>';
+            
+            try {
+                const response = await fetch(`${CONFIG.BACKEND_URL}/api/health`);
+                if (response.ok) {
+                    resultsDiv.innerHTML = '<div class="status success">✅ Backend is running and accessible</div>';
+                } else {
+                    resultsDiv.innerHTML = '<div class="status warning">⚠️ Backend responded but may have issues</div>';
+                }
+            } catch (error) {
+                resultsDiv.innerHTML = '<div class="status warning">❌ Backend is not accessible</div>';
+            }
+        }
+
+        async function testWebSocketConnection() {
+            const resultsDiv = document.getElementById('troubleshoot-results');
+            resultsDiv.innerHTML = '<p>Testing WebSocket connection...</p>';
+            
+            try {
+                const ws = new WebSocket('ws://localhost:8080/api/ws');
+                ws.onopen = () => {
+                    resultsDiv.innerHTML = '<div class="status success">✅ WebSocket connection successful</div>';
+                    ws.close();
+                };
+                ws.onerror = () => {
+                    resultsDiv.innerHTML = '<div class="status warning">❌ WebSocket connection failed</div>';
+                };
+            } catch (error) {
+                resultsDiv.innerHTML = '<div class="status warning">❌ WebSocket connection error</div>';
+            }
+        }
+
+        // Initialize
+        console.log('🎥 Real Video Calling Test Page Loaded');
+        console.log('📋 Follow the steps above to test video calling in the real HealthConnect application');
+    </script>
+</body>
+</html>

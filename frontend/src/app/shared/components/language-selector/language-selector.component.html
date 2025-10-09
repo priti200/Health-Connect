@@ -1,0 +1,27 @@
+<div class="language-selector" (clickOutside)="onClickOutside()">
+  <div class="dropdown">
+    <button 
+      class="btn btn-outline-secondary dropdown-toggle language-btn" 
+      type="button" 
+      (click)="toggleDropdown()"
+      [attr.aria-expanded]="isDropdownOpen">
+      <span class="flag">{{ getCurrentLanguageInfo()?.flag || '🌐' }}</span>
+      <span class="language-name d-none d-md-inline">{{ getCurrentLanguageInfo()?.name || 'Language' }}</span>
+      <span class="language-code d-md-none">{{ currentLanguage.toUpperCase() }}</span>
+    </button>
+    
+    <ul class="dropdown-menu" [class.show]="isDropdownOpen">
+      <li *ngFor="let language of supportedLanguages">
+        <a 
+          class="dropdown-item" 
+          href="#" 
+          (click)="onLanguageChange(language.code); $event.preventDefault()"
+          [class.active]="language.code === currentLanguage">
+          <span class="flag">{{ language.flag }}</span>
+          <span class="language-name">{{ language.name }}</span>
+          <span class="language-code">({{ language.code.toUpperCase() }})</span>
+        </a>
+      </li>
+    </ul>
+  </div>
+</div>

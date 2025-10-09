@@ -1,0 +1,125 @@
+<div class="chat-window" *ngIf="chat">
+  <!-- Chat Header -->
+  <div class="chat-header">
+    <div class="participant-info">
+      <img 
+        [src]="getOtherParticipant()?.avatar || '/assets/images/default-avatar.png'" 
+        [alt]="getOtherParticipant()?.fullName"
+        class="participant-avatar">
+      <div class="participant-details">
+        <h6 class="mb-0">{{ getOtherParticipant()?.fullName }}</h6>
+        <small class="text-muted">
+          {{ getOtherParticipant()?.role === 'DOCTOR' ? 'Dr. ' + getOtherParticipant()?.specialization : 'Patient' }}
+        </small>
+        <!-- Doctor Availability -->
+        <app-doctor-availability
+          *ngIf="getOtherParticipant()?.role === 'DOCTOR'"
+          [doctorId]="getOtherParticipant()?.id"
+          [showDetails]="false"
+          size="sm">
+        </app-doctor-availability>
+      </div>
+    </div>
+    
+    <div class="connection-status">
+      <span 
+        class="status-indicator"
+        [class.connected]="connectionStatus"
+        [class.disconnected]="!connectionStatus">
+        <i class="bi" [class.bi-wifi]="connectionStatus" [class.bi-wifi-off]="!connectionStatus"></i>
+      </span>
+    </div>
+  </div>
+
+  <!-- Appointment Context -->
+  <app-appointment-context
+    *ngIf="chat?.relatedAppointment"
+    [appointmentId]="chat.relatedAppointment.id"
+    [chatType]="chat.type">
+  </app-appointment-context>
+
+  <!-- Messages Area -->
+  <div class="messages-container" #messagesContainer>
+    <div *ngIf="loading" class="text-center p-3">
+      <div class="spinner-border spinner-border-sm" role="status">
+        <span class="visually-hidden">Loading messages...</span>
+      </div>
+    </div>
+
+    <div *ngIf="!loading && messages.length === 0" class="text-center p-4 text-muted">
+      <i class="bi bi-chat-square-text fs-1 mb-3 d-block"></i>
+      <p>No messages yet</p>
+      <small>Start the conversation!</small>
+    </div>
+
+    <div *ngIf="!loading && messages.length > 0" class="messages-list">
+      <ng-container *ngFor="let message of messages; let i = index">
+        <!-- Date Separator -->
+        <div *ngIf="shouldShowDateSeparator(i)" class="date-separator">
+          <span class="date-label">{{ formatMessageDate(message.createdAt) }}</span>
+        </div>
+
+        <!-- Message Item -->
+        <app-message-item 
+          [message]="message" 
+          [isOwn]="message.sender.id === currentUser?.id">
+        </app-message-item>
+      </ng-container>
+
+      <!-- Typing Indicator -->
+      <div *ngIf="isTyping()" class="typing-indicator">
+        <div class="typing-dots">
+          <span></span>
+          <span></span>
+          <span></span>
+        </div>
+        <small class="text-muted ms-2">{{ getOtherParticipant()?.fullName }} is typing...</small>
+      </div>
+    </div>
+  </div>
+
+  <!-- Message Input - SIMPLIFIED APPROACH -->
+  <div class="message-input-container">
+    <!-- Simple input without complex Angular forms -->
+    <div class="input-group">
+      <input
+        type="text"
+        class="form-control message-input"
+        placeholder="Type a message..."
+        [(ngModel)]="messageContent"
+        (keypress)="onKeyPress($event)"
+        (input)="onInputChange()"
+        (blur)="onInputBlur()"
+        autocomplete="off"
+        maxlength="1000"
+        #messageInput
+        [disabled]="sending || !connectionStatus">
+
+      <button
+        type="button"
+        class="btn btn-primary send-button"
+        (click)="sendMessage()"
+        [disabled]="!messageContent.trim() || !chat || !connectionStatus || sending">
+        <i class="bi bi-send" *ngIf="!sending"></i>
+        <div class="spinner-border spinner-border-sm" *ngIf="sending" role="status">
+          <span class="visually-hidden">Sending...</span>
+        </div>
+      </button>
+    </div>
+
+    <div *ngIf="!connectionStatus" class="connection-warning">
+      <small class="text-warning">
+        <i class="bi bi-exclamation-triangle me-1"></i>
+        Connection lost. Trying to reconnect...
+      </small>
+    </div>
+  </div>
+</div>
+
+<div class="chat-placeholder" *ngIf="!chat">
+  <div class="text-center text-muted">
+    <i class="bi bi-chat-square-text fs-1 mb-3 d-block"></i>
+    <h5>Select a conversation</h5>
+    <p>Choose a conversation from the list to start messaging</p>
+  </div>
+</div>

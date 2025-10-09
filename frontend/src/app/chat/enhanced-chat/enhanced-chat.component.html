@@ -1,0 +1,234 @@
+<div class="enhanced-chat-container" [class.drag-over]="dragOver" 
+     (dragover)="onDragOver($event)" 
+     (dragleave)="onDragLeave($event)" 
+     (drop)="onDrop($event)">
+  
+  <!-- Chat Header -->
+  <div class="chat-header">
+    <div class="chat-info">
+      <div class="participant-info" *ngIf="chat">
+        <div class="avatar">
+          <img [src]="chat.doctor.avatar || '/assets/images/default-avatar.png'" 
+               [alt]="chat.doctor.fullName">
+          <span class="status-indicator" 
+                [class.online]="presenceService.isUserOnline(chat.doctor.id)"
+                [class.offline]="!presenceService.isUserOnline(chat.doctor.id)">
+          </span>
+        </div>
+        <div class="details">
+          <h3>{{ chat.doctor.fullName }}</h3>
+          <p class="specialization">{{ chat.doctor.specialization }}</p>
+          <p class="status" *ngIf="presenceService.getUserPresence(chat.doctor.id) as presence">
+            {{ presence.status | lowercase }}
+            <span *ngIf="presence.statusMessage"> - {{ presence.statusMessage }}</span>
+          </p>
+        </div>
+      </div>
+    </div>
+    
+    <div class="chat-actions">
+      <button class="btn btn-outline-primary btn-sm" 
+              title="Start Video Call"
+              [disabled]="!isConnected">
+        <i class="fas fa-video"></i>
+      </button>
+      <button class="btn btn-outline-secondary btn-sm" 
+              title="Chat Settings">
+        <i class="fas fa-cog"></i>
+      </button>
+    </div>
+  </div>
+
+  <!-- Connection Status -->
+  <div class="connection-status" *ngIf="!isConnected">
+    <div class="alert alert-warning">
+      <i class="fas fa-exclamation-triangle"></i>
+      Connection lost. Trying to reconnect...
+    </div>
+  </div>
+
+  <!-- Messages Container -->
+  <div class="messages-container" #messagesContainer>
+    <!-- Load More Button -->
+    <div class="load-more" *ngIf="hasMoreMessages">
+      <button class="btn btn-link" (click)="loadMoreMessages()" [disabled]="isLoading">
+        <i class="fas fa-spinner fa-spin" *ngIf="isLoading"></i>
+        <span *ngIf="!isLoading">Load earlier messages</span>
+      </button>
+    </div>
+
+    <!-- Messages -->
+    <div class="message" 
+         *ngFor="let message of messages; trackBy: trackByMessageId"
+         [class.own-message]="message.sender.id === currentUser?.id"
+         [class.other-message]="message.sender.id !== currentUser?.id">
+      
+      <!-- Message Header -->
+      <div class="message-header" *ngIf="message.sender.id !== currentUser?.id">
+        <img class="sender-avatar" 
+             [src]="message.sender.avatar || '/assets/images/default-avatar.png'" 
+             [alt]="message.sender.fullName">
+        <span class="sender-name">{{ message.sender.fullName }}</span>
+        <span class="message-time">{{ message.createdAt | date:'short' }}</span>
+      </div>
+
+      <!-- Reply Context -->
+      <div class="reply-context" *ngIf="message.replyToMessage">
+        <div class="reply-indicator">
+          <i class="fas fa-reply"></i>
+          <span>Replying to {{ message.replyToMessage.sender.fullName }}</span>
+        </div>
+        <div class="reply-content">
+          {{ message.replyToMessage.content | slice:0:100 }}
+          <span *ngIf="message.replyToMessage.content.length > 100">...</span>
+        </div>
+      </div>
+
+      <!-- Message Content -->
+      <div class="message-content">
+        <div class="message-text" *ngIf="message.content">
+          {{ message.content }}
+        </div>
+
+        <!-- File Attachment -->
+        <div class="message-attachment" *ngIf="message.hasAttachment">
+          <div class="attachment-info">
+            <i class="fas fa-paperclip"></i>
+            <span class="filename">{{ message.fileName }}</span>
+            <span class="filesize">({{ formatFileSize(message.fileSize || 0) }})</span>
+          </div>
+          
+          <!-- Image Preview -->
+          <div class="image-preview" *ngIf="message.fileType?.startsWith('image/')">
+            <img [src]="message.fileUrl" [alt]="message.fileName" class="attachment-image">
+          </div>
+          
+          <!-- Download Link -->
+          <a [href]="message.fileUrl" [download]="message.fileName" class="download-link">
+            <i class="fas fa-download"></i> Download
+          </a>
+        </div>
+
+        <!-- Message Status -->
+        <div class="message-status" *ngIf="message.sender.id === currentUser?.id">
+          <span class="status-icon" [ngSwitch]="message.status">
+            <i *ngSwitchCase="'SENDING'" class="fas fa-clock text-muted" title="Sending"></i>
+            <i *ngSwitchCase="'SENT'" class="fas fa-check text-muted" title="Sent"></i>
+            <i *ngSwitchCase="'DELIVERED'" class="fas fa-check-double text-info" title="Delivered"></i>
+            <i *ngSwitchCase="'READ'" class="fas fa-check-double text-primary" title="Read"></i>
+            <i *ngSwitchCase="'FAILED'" class="fas fa-exclamation-triangle text-danger" title="Failed"></i>
+          </span>
+          <span class="message-time">{{ message.createdAt | date:'short' }}</span>
+        </div>
+      </div>
+
+      <!-- Message Reactions -->
+      <div class="message-reactions" *ngIf="message.reactions && Object.keys(message.reactions).length > 0">
+        <div class="reaction" *ngFor="let reaction of getMessageReactions(message)">
+          <span class="emoji">{{ reaction.emoji }}</span>
+          <span class="count">{{ reaction.count }}</span>
+        </div>
+      </div>
+
+      <!-- Message Actions -->
+      <div class="message-actions" *ngIf="message.sender.id !== currentUser?.id">
+        <button class="btn btn-sm btn-link" (click)="replyTo(message)" title="Reply">
+          <i class="fas fa-reply"></i>
+        </button>
+        <button class="btn btn-sm btn-link" (click)="addReaction(message.id, '👍')" title="Like">
+          <i class="fas fa-thumbs-up"></i>
+        </button>
+      </div>
+    </div>
+
+    <!-- Typing Indicator -->
+    <div class="typing-indicator" *ngIf="typingUsers.length > 0">
+      <div class="typing-animation">
+        <span></span>
+        <span></span>
+        <span></span>
+      </div>
+      <span class="typing-text">{{ getTypingText() }}</span>
+    </div>
+  </div>
+
+  <!-- Reply Preview -->
+  <div class="reply-preview" *ngIf="replyToMessage">
+    <div class="reply-header">
+      <i class="fas fa-reply"></i>
+      <span>Replying to {{ replyToMessage.sender.fullName }}</span>
+      <button class="btn btn-sm btn-link ms-auto" (click)="cancelReply()">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+    <div class="reply-content">
+      {{ replyToMessage.content | slice:0:100 }}
+      <span *ngIf="replyToMessage.content.length > 100">...</span>
+    </div>
+  </div>
+
+  <!-- File Preview -->
+  <div class="file-preview" *ngIf="selectedFile">
+    <div class="file-info">
+      <i class="fas fa-paperclip"></i>
+      <span class="filename">{{ selectedFile.name }}</span>
+      <span class="filesize">({{ formatFileSize(selectedFile.size) }})</span>
+      <button class="btn btn-sm btn-link ms-auto" (click)="removeSelectedFile()">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+  </div>
+
+  <!-- Message Input -->
+  <div class="message-input-container">
+    <form [formGroup]="messageForm" (ngSubmit)="sendMessage()" class="message-form">
+      <div class="input-group">
+        <!-- Attachment Button -->
+        <button type="button" class="btn btn-outline-secondary" 
+                (click)="fileInput.click()" 
+                title="Attach File">
+          <i class="fas fa-paperclip"></i>
+        </button>
+
+        <!-- Message Input -->
+        <input type="text" 
+               class="form-control" 
+               formControlName="content"
+               placeholder="Type a message..."
+               (input)="onTyping()"
+               (blur)="stopTyping()"
+               #messageInput
+               [disabled]="!isConnected">
+
+        <!-- Emoji Button -->
+        <button type="button" class="btn btn-outline-secondary" 
+                (click)="showEmojiPicker = !showEmojiPicker"
+                title="Add Emoji">
+          <i class="fas fa-smile"></i>
+        </button>
+
+        <!-- Send Button -->
+        <button type="submit" 
+                class="btn btn-primary" 
+                [disabled]="messageForm.invalid || !isConnected">
+          <i class="fas fa-paper-plane"></i>
+        </button>
+      </div>
+    </form>
+
+    <!-- Hidden File Input -->
+    <input type="file" 
+           #fileInput 
+           (change)="onFileSelected($event)" 
+           style="display: none"
+           accept="image/*,application/pdf,.doc,.docx,.txt">
+  </div>
+
+  <!-- Drag and Drop Overlay -->
+  <div class="drag-overlay" *ngIf="dragOver">
+    <div class="drag-content">
+      <i class="fas fa-cloud-upload-alt"></i>
+      <p>Drop files here to send</p>
+    </div>
+  </div>
+</div>

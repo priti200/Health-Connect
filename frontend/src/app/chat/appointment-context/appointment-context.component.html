@@ -1,0 +1,115 @@
+<div *ngIf="appointmentId" class="appointment-context-card">
+  <!-- Loading State -->
+  <div *ngIf="loading" class="text-center p-3">
+    <div class="spinner-border spinner-border-sm" role="status">
+      <span class="visually-hidden">Loading...</span>
+    </div>
+    <span class="ms-2">Loading appointment details...</span>
+  </div>
+
+  <!-- Error State -->
+  <div *ngIf="error" class="alert alert-warning mb-0">
+    <i class="fas fa-exclamation-triangle me-2"></i>
+    {{ error }}
+  </div>
+
+  <!-- Appointment Context -->
+  <div *ngIf="appointment && !loading && !error" class="appointment-context">
+    <!-- Header -->
+    <div class="context-header">
+      <div class="d-flex align-items-center">
+        <i [class]="getContextIcon() + ' me-2'"></i>
+        <h6 class="mb-0 fw-bold">{{ getContextTitle() }}</h6>
+      </div>
+      <button 
+        type="button" 
+        class="btn btn-sm btn-outline-primary"
+        (click)="navigateToAppointment()"
+        title="View full appointment details">
+        <i class="fas fa-external-link-alt"></i>
+      </button>
+    </div>
+
+    <!-- Appointment Summary -->
+    <div class="appointment-summary">
+      <div class="row g-2">
+        <div class="col-md-6">
+          <div class="summary-item">
+            <i class="fas fa-calendar-alt text-muted me-2"></i>
+            <span class="fw-medium">{{ appointment.date | date:'mediumDate' }}</span>
+          </div>
+        </div>
+        <div class="col-md-6">
+          <div class="summary-item">
+            <i class="fas fa-clock text-muted me-2"></i>
+            <span class="fw-medium">{{ appointment.startTime }} - {{ appointment.endTime }}</span>
+          </div>
+        </div>
+        <div class="col-md-6">
+          <div class="summary-item">
+            <i class="fas fa-user-md text-muted me-2"></i>
+            <span class="fw-medium">{{ appointment.doctor.fullName }}</span>
+          </div>
+        </div>
+        <div class="col-md-6">
+          <div class="summary-item">
+            <i class="fas fa-tag text-muted me-2"></i>
+            <span class="badge" 
+                  [class]="'badge-' + appointment.status.toLowerCase()">
+              {{ appointment.status }}
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Appointment Type -->
+      <div class="summary-item mt-2">
+        <i class="fas" 
+           [class]="appointment.type === 'VIDEO_CALL' ? 'fa-video' : 'fa-user-friends'"
+           class="text-muted me-2"></i>
+        <span class="fw-medium">
+          {{ appointment.type === 'VIDEO_CALL' ? 'Video Call' : 'In-Person' }}
+        </span>
+      </div>
+
+      <!-- Reason for Visit -->
+      <div *ngIf="appointment.reasonForVisit" class="summary-item mt-2">
+        <i class="fas fa-notes-medical text-muted me-2"></i>
+        <span class="text-muted">{{ appointment.reasonForVisit }}</span>
+      </div>
+
+      <!-- Time Context -->
+      <div class="time-context mt-3">
+        <div *ngIf="isBeforeAppointment()" class="alert alert-info py-2 mb-0">
+          <i class="fas fa-info-circle me-2"></i>
+          <strong>Upcoming:</strong> {{ getTimeUntilAppointment() }}
+        </div>
+        <div *ngIf="isAfterAppointment()" class="alert alert-success py-2 mb-0">
+          <i class="fas fa-check-circle me-2"></i>
+          <strong>Completed:</strong> Follow-up discussion
+        </div>
+      </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="quick-actions mt-3">
+      <div class="btn-group w-100" role="group">
+        <button 
+          *ngIf="appointment.type === 'VIDEO_CALL' && appointment.meetingLink && isBeforeAppointment()"
+          type="button" 
+          class="btn btn-sm btn-primary"
+          (click)="openMeetingLink(appointment.meetingLink)">
+          <i class="fas fa-video me-1"></i>
+          Join Call
+        </button>
+        <button 
+          type="button" 
+          class="btn btn-sm btn-outline-secondary"
+          (click)="navigateToAppointment()">
+          <i class="fas fa-eye me-1"></i>
+          View Details
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

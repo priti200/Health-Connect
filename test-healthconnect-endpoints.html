@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HealthConnect Backend API Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .container { max-width: 1000px; margin: 0 auto; }
+        .test-section { margin: 20px 0; padding: 15px; border: 1px solid #ddd; border-radius: 5px; }
+        .success { color: green; }
+        .error { color: red; }
+        .info { color: blue; }
+        .log { background: #f5f5f5; padding: 10px; margin: 10px 0; border-radius: 3px; max-height: 200px; overflow-y: auto; }
+        button { padding: 10px 15px; margin: 5px; cursor: pointer; }
+        .status { font-weight: bold; padding: 5px; margin: 5px 0; }
+        input, textarea { width: 100%; padding: 8px; margin: 5px 0; }
+        .endpoint { background: #e8f4f8; padding: 10px; margin: 5px 0; border-radius: 3px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🏥 HealthConnect Backend API Test</h1>
+        
+        <div class="test-section">
+            <h2>Configuration</h2>
+            <p><strong>Backend URL:</strong> <span id="backend-url">http://localhost:8080</span></p>
+            <p><strong>Cloud Backend URL:</strong> <span id="cloud-backend-url">https://healthconnect-backend-1026546995867.us-central1.run.app</span></p>
+            <label>
+                <input type="radio" name="backend" value="local" checked> Local Backend (localhost:8080)
+            </label>
+            <label>
+                <input type="radio" name="backend" value="cloud"> Cloud Backend (Google Cloud Run)
+            </label>
+        </div>
+
+        <div class="test-section">
+            <h2>1. Health Check</h2>
+            <button onclick="testHealthCheck()">Test Health Check</button>
+            <div id="health-status" class="status"></div>
+            <div id="health-log" class="log"></div>
+        </div>
+
+        <div class="test-section">
+            <h2>2. Authentication</h2>
+            <div class="endpoint">POST /api/auth/register</div>
+            <input type="email" id="register-email" placeholder="Email" value="test.patient@healthconnect.com">
+            <input type="password" id="register-password" placeholder="Password" value="password123">
+            <input type="text" id="register-name" placeholder="Full Name" value="Test Patient">
+            <select id="register-role">
+                <option value="PATIENT">Patient</option>
+                <option value="DOCTOR">Doctor</option>
+            </select>
+            <button onclick="testRegister()">Test Registration</button>
+            
+            <div class="endpoint">POST /api/auth/login</div>
+            <input type="email" id="login-email" placeholder="Email" value="test.patient@healthconnect.com">
+            <input type="password" id="login-password" placeholder="Password" value="password123">
+            <button onclick="testLogin()">Test Login</button>
+            
+            <div id="auth-status" class="status"></div>
+            <div id="auth-log" class="log"></div>
+        </div>
+
+        <div class="test-section">
+            <h2>3. User Management</h2>
+            <div class="endpoint">GET /api/users/me</div>
+            <button onclick="testGetCurrentUser()">Get Current User</button>
+            
+            <div class="endpoint">GET /api/users/doctors</div>
+            <button onclick="testGetDoctors()">Get All Doctors</button>
+            
+            <div id="user-status" class="status"></div>
+            <div id="user-log" class="log"></div>
+        </div>
+
+        <div class="test-section">
+            <h2>4. AI Health Bot</h2>
+            <div class="endpoint">POST /api/ai-health-bot/chat</div>
+            <textarea id="ai-message" placeholder="Enter your health question..." rows="3">I have a headache and feel tired. What could be the cause?</textarea>
+            <button onclick="testAIHealthBot()">Send to AI Health Bot</button>
+            
+            <div id="ai-status" class="status"></div>
+            <div id="ai-log" class="log"></div>
+        </div>
+
+        <div class="test-section">
+            <h2>5. Appointments</h2>
+            <div class="endpoint">GET /api/appointments</div>
+            <button onclick="testGetAppointments()">Get Appointments</button>
+            
+            <div class="endpoint">POST /api/appointments</div>
+            <input type="date" id="appointment-date" value="">
+            <input type="time" id="appointment-time" value="10:00">
+            <input type="text" id="appointment-reason" placeholder="Reason for visit" value="Regular checkup">
+            <button onclick="testCreateAppointment()">Create Appointment</button>
+            
+            <div id="appointment-status" class="status"></div>
+            <div id="appointment-log" class="log"></div>
+        </div>
+
+        <div class="test-section">
+            <h2>6. Gemini Medical Assistant (Direct)</h2>
+            <div class="endpoint">Direct call to Gemini Medical Assistant API</div>
+            <textarea id="gemini-message" placeholder="Enter medical question..." rows="3">What are the side effects of aspirin?</textarea>
+            <button onclick="testGeminiDirect()">Test Gemini Medical Assistant</button>
+            
+            <div id="gemini-status" class="status"></div>
+            <div id="gemini-log" class="log"></div>
+        </div>
+    </div>
+
+    <script>
+        let authToken = null;
+        
+        function getBackendUrl() {
+            const selectedBackend = document.querySelector('input[name="backend"]:checked').value;
+            return selectedBackend === 'local' 
+                ? 'http://localhost:8080' 
+                : 'https://healthconnect-backend-1026546995867.us-central1.run.app';
+        }
+
+        function log(message, elementId, type = 'info') {
+            const logElement = document.getElementById(elementId);
+            const timestamp = new Date().toLocaleTimeString();
+            const className = type === 'error' ? 'error' : type === 'success' ? 'success' : 'info';
+            logElement.innerHTML += `<div class="${className}">[${timestamp}] ${message}</div>`;
+            logElement.scrollTop = logElement.scrollHeight;
+        }
+
+        function updateStatus(elementId, message, isSuccess) {
+            const statusElement = document.getElementById(elementId);
+            statusElement.textContent = message;
+            statusElement.className = `status ${isSuccess ? 'success' : 'error'}`;
+        }
+
+        async function testHealthCheck() {
+            const backendUrl = getBackendUrl();
+            log(`Testing health check at ${backendUrl}...`, 'health-log');
+            updateStatus('health-status', 'Testing...', false);
+
+            try {
+                const response = await fetch(`${backendUrl}/api/health`, {
+                    method: 'GET',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+
+                if (response.ok) {
+                    const data = await response.text();
+                    log(`✅ Health check successful: ${data}`, 'health-log', 'success');
+                    updateStatus('health-status', 'Backend Healthy', true);
+                } else {
+                    log(`❌ Health check failed: ${response.status}`, 'health-log', 'error');
+                    updateStatus('health-status', 'Backend Unhealthy', false);
+                }
+            } catch (error) {
+                log(`❌ Health check error: ${error.message}`, 'health-log', 'error');
+                updateStatus('health-status', 'Backend Error', false);
+            }
+        }
+
+        async function testRegister() {
+            const backendUrl = getBackendUrl();
+            const email = document.getElementById('register-email').value;
+            const password = document.getElementById('register-password').value;
+            const fullName = document.getElementById('register-name').value;
+            const role = document.getElementById('register-role').value;
+
+            log('Testing user registration...', 'auth-log');
+            updateStatus('auth-status', 'Registering...', false);
+
+            try {
+                const response = await fetch(`${backendUrl}/api/auth/register`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password, fullName, role, confirmPassword: password })
+                });
+
+                const data = await response.json();
+                if (response.ok) {
+                    authToken = data.token;
+                    log(`✅ Registration successful: ${data.message}`, 'auth-log', 'success');
+                    updateStatus('auth-status', 'Registration Success', true);
+                } else {
+                    log(`❌ Registration failed: ${data.message || response.status}`, 'auth-log', 'error');
+                    updateStatus('auth-status', 'Registration Failed', false);
+                }
+            } catch (error) {
+                log(`❌ Registration error: ${error.message}`, 'auth-log', 'error');
+                updateStatus('auth-status', 'Registration Error', false);
+            }
+        }
+
+        async function testLogin() {
+            const backendUrl = getBackendUrl();
+            const email = document.getElementById('login-email').value;
+            const password = document.getElementById('login-password').value;
+
+            log('Testing user login...', 'auth-log');
+            updateStatus('auth-status', 'Logging in...', false);
+
+            try {
+                const response = await fetch(`${backendUrl}/api/auth/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password })
+                });
+
+                const data = await response.json();
+                if (response.ok) {
+                    authToken = data.token;
+                    log(`✅ Login successful: Welcome ${data.fullName}`, 'auth-log', 'success');
+                    log(`Token: ${authToken.substring(0, 20)}...`, 'auth-log');
+                    updateStatus('auth-status', 'Login Success', true);
+                } else {
+                    log(`❌ Login failed: ${data.message || response.status}`, 'auth-log', 'error');
+                    updateStatus('auth-status', 'Login Failed', false);
+                }
+            } catch (error) {
+                log(`❌ Login error: ${error.message}`, 'auth-log', 'error');
+                updateStatus('auth-status', 'Login Error', false);
+            }
+        }
+
+        async function testGetCurrentUser() {
+            if (!authToken) {
+                log('❌ No auth token. Please login first.', 'user-log', 'error');
+                return;
+            }
+
+            const backendUrl = getBackendUrl();
+            log('Testing get current user...', 'user-log');
+            updateStatus('user-status', 'Loading...', false);
+
+            try {
+                const response = await fetch(`${backendUrl}/api/users/me`, {
+                    method: 'GET',
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${authToken}`
+                    }
+                });
+
+                const data = await response.json();
+                if (response.ok) {
+                    log(`✅ Current user: ${data.fullName} (${data.role})`, 'user-log', 'success');
+                    updateStatus('user-status', 'User Data Loaded', true);
+                } else {
+                    log(`❌ Get user failed: ${data.message || response.status}`, 'user-log', 'error');
+                    updateStatus('user-status', 'User Data Failed', false);
+                }
+            } catch (error) {
+                log(`❌ Get user error: ${error.message}`, 'user-log', 'error');
+                updateStatus('user-status', 'User Data Error', false);
+            }
+        }
+
+        async function testGetDoctors() {
+            const backendUrl = getBackendUrl();
+            log('Testing get doctors...', 'user-log');
+
+            try {
+                const response = await fetch(`${backendUrl}/api/users/doctors`, {
+                    method: 'GET',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+
+                const data = await response.json();
+                if (response.ok) {
+                    log(`✅ Found ${data.length} doctors`, 'user-log', 'success');
+                    updateStatus('user-status', 'Doctors Loaded', true);
+                } else {
+                    log(`❌ Get doctors failed: ${response.status}`, 'user-log', 'error');
+                    updateStatus('user-status', 'Doctors Failed', false);
+                }
+            } catch (error) {
+                log(`❌ Get doctors error: ${error.message}`, 'user-log', 'error');
+                updateStatus('user-status', 'Doctors Error', false);
+            }
+        }
+
+        async function testAIHealthBot() {
+            if (!authToken) {
+                log('❌ No auth token. Please login first.', 'ai-log', 'error');
+                return;
+            }
+
+            const backendUrl = getBackendUrl();
+            const message = document.getElementById('ai-message').value;
+            log('Testing AI Health Bot...', 'ai-log');
+            updateStatus('ai-status', 'Processing...', false);
+
+            try {
+                const response = await fetch(`${backendUrl}/api/ai-health-bot/chat`, {
+                    method: 'POST',
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${authToken}`
+                    },
+                    body: JSON.stringify({ message, isNewConversation: true })
+                });
+
+                const data = await response.json();
+                if (response.ok) {
+                    log(`✅ AI Response: ${data.aiResponse}`, 'ai-log', 'success');
+                    updateStatus('ai-status', 'AI Bot Working', true);
+                } else {
+                    log(`❌ AI Bot failed: ${data.message || response.status}`, 'ai-log', 'error');
+                    updateStatus('ai-status', 'AI Bot Failed', false);
+                }
+            } catch (error) {
+                log(`❌ AI Bot error: ${error.message}`, 'ai-log', 'error');
+                updateStatus('ai-status', 'AI Bot Error', false);
+            }
+        }
+
+        async function testGeminiDirect() {
+            const message = document.getElementById('gemini-message').value;
+            log('Testing Gemini Medical Assistant directly...', 'gemini-log');
+            updateStatus('gemini-status', 'Processing...', false);
+
+            try {
+                const response = await fetch('https://us-central1-said-eb2f5.cloudfunctions.net/gemini_medical_assistant', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ message })
+                });
+
+                const data = await response.json();
+                if (response.ok) {
+                    log(`✅ Gemini Response: ${data.response}`, 'gemini-log', 'success');
+                    updateStatus('gemini-status', 'Gemini Working', true);
+                } else {
+                    log(`❌ Gemini failed: ${response.status}`, 'gemini-log', 'error');
+                    updateStatus('gemini-status', 'Gemini Failed', false);
+                }
+            } catch (error) {
+                log(`❌ Gemini error: ${error.message}`, 'gemini-log', 'error');
+                updateStatus('gemini-status', 'Gemini Error', false);
+            }
+        }
+
+        // Set default date to tomorrow
+        document.getElementById('appointment-date').value = new Date(Date.now() + 86400000).toISOString().split('T')[0];
+
+        // Auto-run health check on page load
+        window.onload = function() {
+            setTimeout(testHealthCheck, 1000);
+        };
+    </script>
+</body>
+</html>

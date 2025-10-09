@@ -1,0 +1,131 @@
+<div class="container-fluid py-4">
+  <div class="row">
+    <div class="col-12">
+      <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+          <h4 class="card-title mb-0">
+            <i class="fas fa-calendar me-2"></i>Appointment Calendar
+          </h4>
+          <button 
+            *ngIf="isPatient()" 
+            class="btn btn-primary"
+            routerLink="/appointments/book">
+            <i class="fas fa-plus me-2"></i>
+            Book Appointment
+          </button>
+        </div>
+        <div class="card-body">
+          <!-- Error Message -->
+          <div *ngIf="error" class="alert alert-danger" role="alert">
+            <i class="fas fa-exclamation-triangle me-2"></i>
+            {{ error }}
+          </div>
+
+          <!-- Calendar Navigation -->
+          <div class="calendar-nav d-flex justify-content-between align-items-center mb-4">
+            <button class="btn btn-outline-primary" (click)="previousMonth()">
+              <i class="fas fa-chevron-left"></i>
+            </button>
+            
+            <div class="d-flex align-items-center">
+              <h5 class="mb-0 me-3">{{ getCurrentMonthYear() }}</h5>
+              <button class="btn btn-sm btn-outline-secondary" (click)="goToToday()">
+                Today
+              </button>
+            </div>
+            
+            <button class="btn btn-outline-primary" (click)="nextMonth()">
+              <i class="fas fa-chevron-right"></i>
+            </button>
+          </div>
+
+          <!-- Loading Spinner -->
+          <div *ngIf="loading" class="text-center py-4">
+            <div class="spinner-border text-primary" role="status">
+              <span class="visually-hidden">Loading...</span>
+            </div>
+            <p class="mt-2 text-muted">Loading calendar...</p>
+          </div>
+
+          <!-- Calendar Grid -->
+          <div *ngIf="!loading" class="calendar-grid">
+            <!-- Day Headers -->
+            <div class="calendar-header">
+              <div class="day-header" *ngFor="let dayName of dayNames">
+                {{ dayName }}
+              </div>
+            </div>
+
+            <!-- Calendar Days -->
+            <div class="calendar-body">
+              <div 
+                class="calendar-day"
+                *ngFor="let day of calendarDays"
+                [ngClass]="{
+                  'other-month': !day.isCurrentMonth,
+                  'today': day.isToday,
+                  'has-appointments': day.appointments.length > 0,
+                  'clickable': day.isCurrentMonth
+                }"
+                (click)="onDayClick(day)">
+                
+                <div class="day-number">
+                  {{ day.date.getDate() }}
+                </div>
+                
+                <div class="appointments-container" *ngIf="day.appointments.length > 0">
+                  <div 
+                    class="appointment-item"
+                    *ngFor="let appointment of day.appointments.slice(0, 2)"
+                    [ngClass]="getStatusBadgeClass(appointment.status)">
+                    <span class="appointment-time">
+                      {{ formatTime(appointment.startTime) }}
+                    </span>
+                    <span class="appointment-title">
+                      {{ isDoctor() ? appointment.patient.fullName : appointment.doctor.fullName }}
+                    </span>
+                  </div>
+                  
+                  <div 
+                    *ngIf="day.appointments.length > 2" 
+                    class="more-appointments">
+                    +{{ day.appointments.length - 2 }} more
+                  </div>
+                </div>
+                
+                <div 
+                  *ngIf="day.appointments.length === 0 && day.isCurrentMonth && day.date >= currentDate"
+                  class="add-appointment">
+                  <i class="fas fa-plus"></i>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Legend -->
+          <div class="calendar-legend mt-4">
+            <h6>Legend:</h6>
+            <div class="d-flex flex-wrap gap-3">
+              <div class="legend-item">
+                <span class="legend-color badge-primary"></span>
+                <span>Confirmed</span>
+              </div>
+              <div class="legend-item">
+                <span class="legend-color badge-warning"></span>
+                <span>Pending</span>
+              </div>
+              <div class="legend-item">
+                <span class="legend-color badge-success"></span>
+                <span>Completed</span>
+              </div>
+              <div class="legend-item">
+                <span class="legend-color badge-danger"></span>
+                <span>Cancelled</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

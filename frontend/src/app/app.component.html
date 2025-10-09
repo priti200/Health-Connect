@@ -1,0 +1,148 @@
+<!-- Clean Medical Navigation -->
+<nav *ngIf="showNavigation && currentUser" class="hc-navbar">
+  <div class="hc-navbar-container">
+    <!-- Official HealthConnect Brand -->
+    <div class="hc-brand" (click)="navigateToDashboard()">
+      <div class="hc-logo">
+        <i class="bi bi-heart-pulse"></i>
+      </div>
+      <span class="hc-brand-name">HealthConnect</span>
+    </div>
+
+    <!-- Essential Navigation -->
+    <div class="hc-nav-menu">
+      <!-- Patient Navigation -->
+      <ng-container *ngIf="currentUser.role === 'PATIENT'">
+        <a class="hc-nav-link" routerLink="/appointments" routerLinkActive="active">
+          <i class="fas fa-calendar"></i>
+          <span>Appointments</span>
+        </a>
+        <a class="hc-nav-link" routerLink="/doctors" routerLinkActive="active">
+          <i class="fas fa-user-md"></i>
+          <span>Doctors</span>
+        </a>
+        <a class="hc-nav-link" routerLink="/telemedicine" routerLinkActive="active">
+          <i class="fas fa-video"></i>
+          <span>Video Call</span>
+        </a>
+        <a class="hc-nav-link" routerLink="/ai-health-bot" routerLinkActive="active">
+          <i class="fas fa-robot"></i>
+          <span>AI Assistant</span>
+        </a>
+      </ng-container>
+
+      <!-- Doctor Navigation -->
+      <ng-container *ngIf="currentUser.role === 'DOCTOR'">
+        <a class="hc-nav-link" routerLink="/appointments" routerLinkActive="active">
+          <i class="fas fa-calendar"></i>
+          <span>Schedule</span>
+        </a>
+        <a class="hc-nav-link" routerLink="/patients" routerLinkActive="active">
+          <i class="fas fa-users"></i>
+          <span>Patients</span>
+        </a>
+        <a class="hc-nav-link" routerLink="/telemedicine" routerLinkActive="active">
+          <i class="fas fa-video"></i>
+          <span>Video Call</span>
+        </a>
+      </ng-container>
+    </div>
+
+    <!-- Simple User Section -->
+    <div class="hc-user-section">
+      <!-- User Profile -->
+      <div class="hc-user-menu" [class.open]="isUserMenuOpen">
+        <button class="hc-user-btn" (click)="toggleUserMenu()">
+          <div class="hc-avatar">
+            {{ getInitials(currentUser.fullName) }}
+          </div>
+          <span class="hc-user-name">{{ currentUser.fullName }}</span>
+          <i class="fas fa-chevron-down"></i>
+        </button>
+
+        <!-- Simple Dropdown -->
+        <div class="hc-dropdown" *ngIf="isUserMenuOpen">
+          <a class="hc-dropdown-link" (click)="navigateToProfile(); toggleUserMenu()">
+            <i class="fas fa-user"></i>
+            Profile
+          </a>
+          <a class="hc-dropdown-link" (click)="logout(); toggleUserMenu()">
+            <i class="fas fa-sign-out-alt"></i>
+            Sign Out
+          </a>
+        </div>
+      </div>
+
+      <!-- Mobile Menu Toggle -->
+      <button class="hc-mobile-btn" (click)="toggleMobileMenu()">
+        <i class="fas fa-bars"></i>
+      </button>
+    </div>
+  </div>
+
+  <!-- Mobile Menu -->
+  <div class="hc-mobile-menu" [class.open]="isMobileMenuOpen" *ngIf="isMobileMenuOpen">
+    <!-- Patient Mobile Menu -->
+    <ng-container *ngIf="currentUser.role === 'PATIENT'">
+      <a class="hc-mobile-link" routerLink="/appointments" (click)="toggleMobileMenu()">
+        <i class="fas fa-calendar"></i>
+        Appointments
+      </a>
+      <a class="hc-mobile-link" routerLink="/doctors" (click)="toggleMobileMenu()">
+        <i class="fas fa-user-md"></i>
+        Doctors
+      </a>
+      <a class="hc-mobile-link" routerLink="/telemedicine" (click)="toggleMobileMenu()">
+        <i class="fas fa-video"></i>
+        Video Call
+      </a>
+      <a class="hc-mobile-link" routerLink="/ai-health-bot" (click)="toggleMobileMenu()">
+        <i class="fas fa-robot"></i>
+        AI Assistant
+      </a>
+    </ng-container>
+
+    <!-- Doctor Mobile Menu -->
+    <ng-container *ngIf="currentUser.role === 'DOCTOR'">
+      <a class="hc-mobile-link" routerLink="/appointments" (click)="toggleMobileMenu()">
+        <i class="fas fa-calendar"></i>
+        Schedule
+      </a>
+      <a class="hc-mobile-link" routerLink="/patients" (click)="toggleMobileMenu()">
+        <i class="fas fa-users"></i>
+        Patients
+      </a>
+      <a class="hc-mobile-link" routerLink="/telemedicine" (click)="toggleMobileMenu()">
+        <i class="fas fa-video"></i>
+        Video Call
+      </a>
+    </ng-container>
+
+    <div class="hc-mobile-divider"></div>
+
+    <a class="hc-mobile-link" (click)="navigateToProfile(); toggleMobileMenu()">
+      <i class="fas fa-user"></i>
+      Profile
+    </a>
+    <a class="hc-mobile-link" (click)="logout(); toggleMobileMenu()">
+      <i class="fas fa-sign-out-alt"></i>
+      Sign Out
+    </a>
+  </div>
+</nav>
+
+<!-- Main Content -->
+<main class="main-content" [class.with-navbar]="showNavigation && currentUser">
+  <router-outlet></router-outlet>
+</main>
+
+<!-- Footer (only show when not in auth pages) -->
+<footer *ngIf="showNavigation" class="bg-light text-center py-3 mt-auto">
+  <div class="container">
+    <small class="text-muted">
+      &copy; 2024 HealthConnect. All rights reserved. | 
+      <a href="#" class="text-decoration-none">Privacy Policy</a> | 
+      <a href="#" class="text-decoration-none">Terms of Service</a>
+    </small>
+  </div>
+</footer>

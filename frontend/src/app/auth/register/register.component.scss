@@ -1,0 +1,193 @@
+// Clean Medical Register - Teal & White Theme
+@import '../../../styles/design-system.scss';
+
+// HealthConnect Official Logo
+.healthconnect-logo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  .logo-icon {
+    background: linear-gradient(135deg, #0d9488, #0f766e);
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 8px 24px rgba(20, 184, 166, 0.3);
+    transition: all 0.3s ease;
+    width: 60px;
+    height: 60px;
+
+    i {
+      color: white;
+      font-weight: 600;
+      font-size: 1.5rem;
+    }
+  }
+
+  &:hover .logo-icon {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 32px rgba(20, 184, 166, 0.4);
+  }
+
+  // XL size for branding panel
+  &.logo-xl .logo-icon {
+    width: 120px;
+    height: 120px;
+    border-radius: 32px;
+
+    i {
+      font-size: 3rem;
+    }
+  }
+}
+
+.min-vh-100 {
+  min-height: 100vh;
+}
+
+.card {
+  border: none;
+  border-radius: var(--hc-radius-xl);
+  box-shadow: 0 8px 32px rgba(20, 184, 166, 0.1);
+}
+
+.form-check-input:checked {
+  background-color: var(--hc-primary-600);
+  border-color: var(--hc-primary-600);
+}
+
+.form-check-label {
+  cursor: pointer;
+  font-weight: 500;
+  color: var(--hc-gray-700);
+}
+
+// Premium Button Styling
+.btn-premium {
+  background: linear-gradient(135deg, #0d9488, #0f766e);
+  border: none;
+  border-radius: 16px;
+  padding: 16px 24px;
+  font-weight: 600;
+  font-size: 1.1rem;
+  color: white;
+  box-shadow:
+    0 8px 24px rgba(20, 184, 166, 0.3),
+    0 4px 12px rgba(20, 184, 166, 0.2);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transition: left 0.5s;
+  }
+
+  &:hover {
+    transform: translateY(-3px);
+    box-shadow:
+      0 12px 32px rgba(20, 184, 166, 0.4),
+      0 8px 16px rgba(20, 184, 166, 0.3);
+
+    &::before {
+      left: 100%;
+    }
+  }
+
+  &:active {
+    transform: translateY(-1px);
+  }
+
+  &:disabled {
+    background: #9ca3af;
+    transform: none;
+    box-shadow: none;
+    cursor: not-allowed;
+
+    &::before {
+      display: none;
+    }
+  }
+}
+
+.border-top {
+  border-color: var(--hc-primary-100) !important;
+}
+
+.text-primary {
+  color: var(--hc-primary-600) !important;
+}
+
+.alert {
+  border: none;
+  border-radius: var(--hc-radius-lg);
+}
+
+.form-control {
+  border: 2px solid #a7f3d0;
+  border-radius: 12px;
+  padding: 12px 16px;
+  font-size: 1rem;
+  color: #374151;
+  background: rgba(248, 250, 252, 0.8);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+
+  &::placeholder {
+    color: #9ca3af;
+    opacity: 0.8;
+  }
+}
+
+.form-control:focus {
+  background: #ffffff;
+  border-color: #14b8a6;
+  box-shadow:
+    0 0 0 4px rgba(20, 184, 166, 0.1),
+    0 4px 12px rgba(20, 184, 166, 0.15);
+  transform: translateY(-2px);
+}
+
+.form-label {
+  color: #374151;
+  font-weight: 600;
+  font-size: 0.9rem;
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+}
+
+// Additional theme overrides
+.text-dark {
+  color: var(--hc-gray-800) !important;
+}
+
+.text-muted {
+  color: var(--hc-gray-600) !important;
+}
+
+.form-label {
+  color: var(--hc-gray-700);
+  font-weight: 500;
+}
+
+.spinner-border.text-primary {
+  color: var(--hc-primary-600) !important;
+}
+
+// Responsive adjustments
+@media (max-width: 768px) {
+  .container-fluid {
+    padding: 1rem;
+  }
+  
+  .card-body {
+    padding: 2rem 1.5rem !important;
+  }
+}

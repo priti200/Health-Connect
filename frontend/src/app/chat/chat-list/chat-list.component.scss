@@ -1,0 +1,125 @@
+.chat-list {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  border-right: 1px solid #e9ecef;
+}
+
+.chat-list-header {
+  padding: 1rem;
+  border-bottom: 1px solid #e9ecef;
+  background-color: #f8f9fa;
+}
+
+.chat-list-body {
+  flex: 1;
+  overflow-y: auto;
+}
+
+.chat-items {
+  .chat-item {
+    display: flex;
+    align-items: center;
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid #f1f3f4;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+
+    &:hover {
+      background-color: #f8f9fa;
+    }
+
+    &.active {
+      background-color: #e3f2fd;
+      border-left: 3px solid #2196f3;
+    }
+
+    .chat-avatar {
+      position: relative;
+      margin-right: 0.75rem;
+
+      .avatar-img {
+        width: 45px;
+        height: 45px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 2px solid #e9ecef;
+      }
+
+      .online-indicator {
+        position: absolute;
+        bottom: 2px;
+        right: 2px;
+        width: 12px;
+        height: 12px;
+        background-color: #4caf50;
+        border: 2px solid white;
+        border-radius: 50%;
+      }
+    }
+
+    .chat-content {
+      flex: 1;
+      min-width: 0;
+
+      .chat-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 0.25rem;
+
+        .chat-name {
+          font-weight: 600;
+          color: #333;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
+
+        .chat-time {
+          font-size: 0.75rem;
+          white-space: nowrap;
+        }
+      }
+
+      .chat-preview {
+        p {
+          font-size: 0.875rem;
+          line-height: 1.3;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
+      }
+    }
+
+    .chat-meta {
+      margin-left: 0.5rem;
+
+      .badge {
+        font-size: 0.75rem;
+        min-width: 20px;
+        height: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+    }
+  }
+}
+
+// Responsive design
+@media (max-width: 768px) {
+  .chat-list {
+    border-right: none;
+  }
+
+  .chat-items .chat-item {
+    padding: 1rem;
+
+    .chat-avatar .avatar-img {
+      width: 50px;
+      height: 50px;
+    }
+  }
+}

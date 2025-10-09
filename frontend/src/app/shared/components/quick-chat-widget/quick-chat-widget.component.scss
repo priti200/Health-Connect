@@ -1,0 +1,239 @@
+.quick-chat-widget {
+  .card {
+    border: none;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    border-radius: 12px;
+    overflow: hidden;
+  }
+
+  .card-header {
+    background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+    color: white;
+    border-bottom: none;
+    padding: 1rem 1.25rem;
+
+    h6 {
+      color: white;
+    }
+
+    .btn-outline-primary {
+      border-color: rgba(255, 255, 255, 0.5);
+      color: white;
+
+      &:hover {
+        background-color: rgba(255, 255, 255, 0.1);
+        border-color: white;
+      }
+    }
+  }
+
+  .card-body {
+    padding: 1.25rem;
+  }
+
+  // Chat List Styles
+  .chat-list {
+    .chat-item {
+      display: flex;
+      align-items: center;
+      padding: 0.75rem;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      margin-bottom: 0.5rem;
+
+      &:hover {
+        background-color: #f8f9fa;
+        transform: translateX(2px);
+      }
+
+      &:last-child {
+        margin-bottom: 0;
+      }
+
+      .chat-avatar {
+        flex-shrink: 0;
+        margin-right: 0.75rem;
+
+        img {
+          width: 40px;
+          height: 40px;
+          object-fit: cover;
+        }
+      }
+
+      .chat-info {
+        flex: 1;
+        min-width: 0;
+
+        .chat-name {
+          font-weight: 500;
+          color: #212529;
+          margin-bottom: 0.25rem;
+        }
+
+        .chat-preview {
+          font-size: 0.875rem;
+          color: #6c757d;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap;
+        }
+      }
+
+      .chat-meta {
+        flex-shrink: 0;
+        text-align: right;
+
+        .badge {
+          font-size: 0.75rem;
+          margin-top: 0.25rem;
+        }
+      }
+    }
+  }
+
+  // Appointment List Styles
+  .appointment-list {
+    .appointment-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1rem;
+      border: 1px solid #e9ecef;
+      border-radius: 8px;
+      margin-bottom: 0.75rem;
+      background: #f8f9fa;
+
+      &:last-child {
+        margin-bottom: 0;
+      }
+
+      .appointment-info {
+        flex: 1;
+
+        .appointment-doctor {
+          margin-bottom: 0.25rem;
+        }
+
+        .appointment-details {
+          margin-bottom: 0.5rem;
+        }
+
+        .appointment-time-left {
+          .badge {
+            font-size: 0.75rem;
+          }
+        }
+      }
+
+      .appointment-actions {
+        flex-shrink: 0;
+        margin-left: 1rem;
+
+        .btn-group-vertical {
+          .btn {
+            margin-bottom: 0.25rem;
+            font-size: 0.75rem;
+            padding: 0.25rem 0.5rem;
+
+            &:last-child {
+              margin-bottom: 0;
+            }
+          }
+        }
+      }
+    }
+  }
+
+  // No Data State
+  .no-data {
+    text-align: center;
+    padding: 2rem 1rem;
+
+    i {
+      opacity: 0.5;
+    }
+  }
+
+  // Quick Actions
+  .quick-actions {
+    .btn {
+      font-size: 0.875rem;
+      padding: 0.5rem 0.75rem;
+    }
+  }
+
+  // Section Headers
+  h6.text-muted {
+    font-size: 0.875rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 1rem;
+
+    i {
+      opacity: 0.7;
+    }
+  }
+}
+
+// Responsive Design
+@media (max-width: 768px) {
+  .quick-chat-widget {
+    .card-body {
+      padding: 1rem;
+    }
+
+    .chat-list .chat-item {
+      padding: 0.5rem;
+
+      .chat-avatar img {
+        width: 32px;
+        height: 32px;
+      }
+    }
+
+    .appointment-list .appointment-item {
+      flex-direction: column;
+      align-items: flex-start;
+
+      .appointment-actions {
+        margin-left: 0;
+        margin-top: 0.75rem;
+        width: 100%;
+
+        .btn-group-vertical {
+          flex-direction: row;
+          width: 100%;
+
+          .btn {
+            flex: 1;
+            margin-bottom: 0;
+            margin-right: 0.25rem;
+
+            &:last-child {
+              margin-right: 0;
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+// Animation
+.quick-chat-widget {
+  animation: slideInUp 0.3s ease-out;
+}
+
+@keyframes slideInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
