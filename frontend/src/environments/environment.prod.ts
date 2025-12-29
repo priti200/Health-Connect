@@ -1,7 +1,7 @@
 export const environment = {
   production: true,
-  apiUrl: 'http://localhost:8080/api',
-  wsUrl: 'http://localhost:8080/ws',
+  apiUrl: 'https://healthconnect-backend-xwc4.onrender.com/api',
+  wsUrl: 'https://healthconnect-backend-xwc4.onrender.com/ws',
   appName: 'HealthConnect',
   version: '1.0.0',
   agora: {
