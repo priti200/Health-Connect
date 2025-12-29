@@ -1,7 +1,7 @@
 export const environment = {
   production: true,
-  apiUrl: 'http://localhost:8081/api',
-  wsUrl: 'http://localhost:8081/ws',
+  apiUrl: 'http://localhost:8080/api',
+  wsUrl: 'http://localhost:8080/ws',
   appName: 'HealthConnect',
   version: '1.0.0',
   agora: {
@@ -9,7 +9,7 @@ export const environment = {
   },
   geminiApiUrl: 'https://us-central1-said-eb2f5.cloudfunctions.net/gemini_medical_assistant',
   websocket: {
-    url: 'http://localhost:8081/ws',
+    url: 'http://localhost:8080/ws',
     maxReconnectAttempts: 5,
     reconnectInterval: 3000,
     heartbeatIncoming: 25000,

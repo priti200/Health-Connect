@@ -26,6 +26,13 @@ public class VideoConsultationService {
     public VideoConsultation createConsultation(Appointment appointment, VideoConsultation.ConsultationType type) {
         log.info("Creating video consultation for appointment: {}", appointment.getId());
         
+        // Check if consultation already exists
+        var existing = consultationRepository.findByAppointmentId(appointment.getId());
+        if (existing.isPresent()) {
+            log.info("Returning existing video consultation for appointment: {}", appointment.getId());
+            return existing.get();
+        }
+        
         String roomId = generateRoomId();
         String sessionId = "agora-session-" + roomId; // Simple session ID for Agora
         

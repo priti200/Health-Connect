@@ -28,12 +28,12 @@ export interface TypingNotification {
 export class PresenceService {
   private stompClient: Client | null = null;
   private wsUrl = environment.wsUrl;
-  
+
   private userPresences$ = new BehaviorSubject<Map<number, UserPresence>>(new Map());
   private currentUserPresence$ = new BehaviorSubject<UserPresence | null>(null);
   private typingNotifications$ = new Subject<TypingNotification>();
   private connectionStatus$ = new BehaviorSubject<boolean>(false);
-  
+
   private heartbeatInterval: any;
   private typingTimeouts = new Map<number, any>();
 
@@ -52,6 +52,20 @@ export class PresenceService {
     const token = this.authService.getToken();
     if (!token) {
       return;
+    }
+
+    // Check if we already have an active client
+    if (this.stompClient) {
+      if (this.stompClient.connected) {
+        return;
+      }
+      // If we have a client but it's not connected, it might be connecting or dead.
+      // Safest is to deactivate it before creating a new one to prevent leaks.
+      try {
+        this.stompClient.deactivate();
+      } catch (e) {
+        console.warn('Error deactivating existing stomp client:', e);
+      }
     }
 
     this.stompClient = new Client({
@@ -307,7 +321,7 @@ export class PresenceService {
 
   public getOnlineUsers(): UserPresence[] {
     const presences = this.userPresences$.value;
-    return Array.from(presences.values()).filter(p => 
+    return Array.from(presences.values()).filter(p =>
       ['ONLINE', 'BUSY', 'AWAY'].includes(p.status)
     );
   }

@@ -17,7 +17,7 @@
           <i class="fas fa-calendar"></i>
           <span>Appointments</span>
         </a>
-        <a class="hc-nav-link" routerLink="/doctors" routerLinkActive="active">
+        <a class="hc-nav-link" routerLink="/appointments/doctors" routerLinkActive="active">
           <i class="fas fa-user-md"></i>
           <span>Doctors</span>
         </a>
@@ -88,7 +88,7 @@
         <i class="fas fa-calendar"></i>
         Appointments
       </a>
-      <a class="hc-mobile-link" routerLink="/doctors" (click)="toggleMobileMenu()">
+      <a class="hc-mobile-link" routerLink="/appointments/doctors" (click)="toggleMobileMenu()">
         <i class="fas fa-user-md"></i>
         Doctors
       </a>
@@ -140,8 +140,8 @@
 <footer *ngIf="showNavigation" class="bg-light text-center py-3 mt-auto">
   <div class="container">
     <small class="text-muted">
-      &copy; 2024 HealthConnect. All rights reserved. | 
-      <a href="#" class="text-decoration-none">Privacy Policy</a> | 
+      &copy; 2024 HealthConnect. All rights reserved. |
+      <a href="#" class="text-decoration-none">Privacy Policy</a> |
       <a href="#" class="text-decoration-none">Terms of Service</a>
     </small>
   </div>

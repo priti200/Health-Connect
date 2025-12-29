@@ -34,11 +34,11 @@ export interface AgoraTokenResponse {
 })
 export class AgoraVideoService {
   private readonly APP_ID = environment.agora.appId;
-  
+
   private client: IAgoraRTCClient | null = null;
   private localVideoTrack: ICameraVideoTrack | null = null;
   private localAudioTrack: IMicrophoneAudioTrack | null = null;
-  
+
   // State management
   private callStateSubject = new BehaviorSubject<AgoraCallState>({
     isConnected: false,
@@ -97,9 +97,9 @@ export class AgoraVideoService {
 
     } catch (error) {
       console.error('Failed to join room:', error);
-      this.updateCallState({ 
-        isConnecting: false, 
-        error: 'Failed to join video call. Please try again.' 
+      this.updateCallState({
+        isConnecting: false,
+        error: 'Failed to join video call. Please try again.'
       });
       throw error;
     }
@@ -201,13 +201,30 @@ export class AgoraVideoService {
       }
 
       // Create local video and audio tracks separately to avoid TypeScript issues
-      this.localAudioTrack = await AgoraRTC.createMicrophoneAudioTrack({
-        encoderConfig: "music_standard",
-      });
+      try {
+        this.localAudioTrack = await AgoraRTC.createMicrophoneAudioTrack({
+          encoderConfig: "music_standard",
+        });
+        console.log('Audio track created successfully');
+      } catch (audioError) {
+        console.error('Failed to create audio track:', audioError);
+        throw new Error('Failed to access microphone. Please check your device settings.');
+      }
 
-      this.localVideoTrack = await AgoraRTC.createCameraVideoTrack({
-        encoderConfig: "480p_1",
-      });
+      try {
+        this.localVideoTrack = await AgoraRTC.createCameraVideoTrack({
+          encoderConfig: "480p_1",
+        });
+        console.log('Video track created successfully');
+      } catch (videoError) {
+        console.error('Failed to create video track:', videoError);
+        // Clean up audio track if video fails
+        if (this.localAudioTrack) {
+          this.localAudioTrack.close();
+          this.localAudioTrack = null;
+        }
+        throw new Error('Failed to access camera. Please check if it is being used by another application.');
+      }
 
       console.log('Local tracks created successfully');
 
@@ -227,6 +244,10 @@ export class AgoraVideoService {
 
       // Provide specific error messages
       if (error instanceof Error) {
+        console.error('Error name:', error.name);
+        console.error('Error message:', error.message);
+        console.error('Error stack:', error.stack);
+
         if (error.message.includes('permission') || error.message.includes('Permission')) {
           throw new Error('Camera and microphone access denied. Please allow permissions and try again.');
         } else if (error.message.includes('NotFoundError')) {
@@ -234,6 +255,8 @@ export class AgoraVideoService {
         } else if (error.message.includes('NotAllowedError')) {
           throw new Error('Camera and microphone access blocked. Please allow permissions in your browser.');
         }
+      } else {
+        console.error('Unknown error object:', JSON.stringify(error));
       }
 
       throw new Error('Failed to access camera and microphone. Please check your devices and permissions.');
@@ -284,9 +307,9 @@ export class AgoraVideoService {
     // Handle connection state changes
     this.client.on('connection-state-change', (curState, revState) => {
       console.log('Connection state changed:', curState, revState);
-      
+
       if (curState === 'DISCONNECTED') {
-        this.updateCallState({ 
+        this.updateCallState({
           isConnected: false,
           error: 'Connection lost. Please try rejoining the call.'
         });

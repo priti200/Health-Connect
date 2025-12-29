@@ -15,7 +15,7 @@ import { NotificationService } from './notification.service';
 export class ChatService {
   private apiUrl = `${environment.apiUrl}/chats`;
   private wsUrl = environment.wsUrl;
-  
+
   private stompClient: Client | null = null;
   private connectionStatusSubject = new BehaviorSubject<boolean>(false);
   private messageSubject = new Subject<Message>();
@@ -43,7 +43,7 @@ export class ChatService {
     if (this.authService.isAuthenticated()) {
       this.connect();
     }
-    
+
     // Listen for authentication changes
     this.authService.currentUser$.subscribe(user => {
       if (user) {
@@ -71,6 +71,16 @@ export class ChatService {
 
     console.log('Connecting to WebSocket at:', this.wsUrl);
     console.log('Authentication token present:', !!token);
+
+    // Clean up existing client if it exists to prevent leaks (zombie connections)
+    if (this.stompClient) {
+      try {
+        console.log('Deactivating existing Stomp client before creating new one');
+        this.stompClient.deactivate();
+      } catch (e) {
+        console.warn('Error deactivating existing client:', e);
+      }
+    }
 
     this.stompClient = new Client({
       webSocketFactory: () => {
@@ -435,7 +445,8 @@ export class ChatService {
     return {
       headers: new HttpHeaders({
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`      })
+        'Authorization': `Bearer ${token}`
+      })
     };
   }
 }
